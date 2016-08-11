@@ -97,6 +97,585 @@ eval(function(p,a,c,k,e,r){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a
 */
 eval(function(p,a,c,k,e,r){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--)r[e(c)]=k[c]||e(c);k=[function(e){return r[e]}];e=function(){return'\\w+'};c=1};while(c--)if(k[c])p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c]);return p}('!6(a){"6"==M B&&B.1h?B(["1i"],a):"1j"==M N?1k.N=a:a(1l)}(6(a){6 b(b){7 g=b||1m.t,h=i.1n(1o,1),j=0,l=0,m=0,n=0,o=0,p=0;u(b=a.t.1p(g),b.O="5","P"8 g&&(m=-1*g.P),"Q"8 g&&(m=g.Q),"R"8 g&&(m=g.R),"S"8 g&&(l=-1*g.S),"T"8 g&&g.T===g.1q&&(l=-1*m,m=0),j=0===m?l:m,"C"8 g&&(m=-1*g.C,j=m),"D"8 g&&(l=g.D,0===m&&(j=-1*l)),0!==m||0!==l){u(1===g.E){7 q=a.y(4,"5-F-v");j*=q,m*=q,l*=q}G u(2===g.E){7 r=a.y(4,"5-H-v");j*=r,m*=r,l*=r}u(n=w.1r(w.U(m),w.U(l)),(!f||f>n)&&(f=n,d(g,n)&&(f/=z)),d(g,n)&&(j/=z,l/=z,m/=z),j=w[j>=1?"I":"J"](j/f),l=w[l>=1?"I":"J"](l/f),m=w[m>=1?"I":"J"](m/f),k.K.V&&4.W){7 s=4.W();o=b.1s-s.1t,p=b.1u-s.1v}x b.D=l,b.C=m,b.1w=f,b.1x=o,b.1y=p,b.E=0,h.1z(b,j,l,m),e&&1A(e),e=1B(c,1C),(a.t.1D||a.t.1E).1F(4,h)}}6 c(){f=X}6 d(a,b){x k.K.Y&&"5"===a.O&&b%1G===0}7 e,f,g=["Z","5","1H","11"],h="1I"8 13||13.1J>=9?["Z"]:["5","1K","11"],i=1L.1M.1N;u(a.t.14)L(7 j=g.A;j;)a.t.14[g[--j]]=a.t.1O;7 k=a.t.1P.5={1Q:"3.1.12",1R:6(){u(4.15)L(7 c=h.A;c;)4.15(h[--c],b,!1);G 4.17=b;a.y(4,"5-F-v",k.18(4)),a.y(4,"5-H-v",k.19(4))},1S:6(){u(4.1a)L(7 c=h.A;c;)4.1a(h[--c],b,!1);G 4.17=X;a.1b(4,"5-F-v"),a.1b(4,"5-H-v")},18:6(b){7 c=a(b),d=c["1c"8 a.1d?"1c":"1T"]();x d.A||(d=a("1U")),1e(d.1f("1g"),10)||1e(c.1f("1g"),10)||16},19:6(b){x a(b).v()},K:{Y:!0,V:!0}};a.1d.1V({5:6(a){x a?4.1W("5",a):4.1X("5")},1Y:6(a){x 4.1Z("5",a)}})});',62,124,'||||this|mousewheel|function|var|in|||||||||||||||||||||event|if|height|Math|return|data|40|length|define|deltaY|deltaX|deltaMode|line|else|page|floor|ceil|settings|for|typeof|exports|type|detail|wheelDelta|wheelDeltaY|wheelDeltaX|axis|abs|normalizeOffset|getBoundingClientRect|null|adjustOldDeltas|wheel||MozMousePixelScroll||document|fixHooks|addEventListener||onmousewheel|getLineHeight|getPageHeight|removeEventListener|removeData|offsetParent|fn|parseInt|css|fontSize|amd|jquery|object|module|jQuery|window|call|arguments|fix|HORIZONTAL_AXIS|max|clientX|left|clientY|top|deltaFactor|offsetX|offsetY|unshift|clearTimeout|setTimeout|200|dispatch|handle|apply|120|DOMMouseScroll|onwheel|documentMode|DomMouseScroll|Array|prototype|slice|mouseHooks|special|version|setup|teardown|parent|body|extend|bind|trigger|unmousewheel|unbind'.split('|'),0,{}));
 /*!
+	ScrollToFixed
+	Copyright	Joseph Cava-Lynch
+	License		MIT
+	Version		1.0.7
+
+	https://github.com/bigspotteddog/ScrollToFixed
+*/
+(function($) {
+    $.isScrollToFixed = function(el) {
+        return !!$(el).data('ScrollToFixed');
+    };
+
+    $.ScrollToFixed = function(el, options) {
+        // To avoid scope issues, use 'base' instead of 'this' to reference this
+        // class from internal events and functions.
+        var base = this;
+
+        // Access to jQuery and DOM versions of element.
+        base.$el = $(el);
+        base.el = el;
+
+        // Add a reverse reference to the DOM object.
+        base.$el.data('ScrollToFixed', base);
+
+        // A flag so we know if the scroll has been reset.
+        var isReset = false;
+
+        // The element that was given to us to fix if scrolled above the top of
+        // the page.
+        var target = base.$el;
+
+        var position;
+        var originalPosition;
+        var originalFloat;
+        var originalOffsetTop;
+        var originalZIndex;
+
+        // The offset top of the element when resetScroll was called. This is
+        // used to determine if we have scrolled past the top of the element.
+        var offsetTop = 0;
+
+        // The offset left of the element when resetScroll was called. This is
+        // used to move the element left or right relative to the horizontal
+        // scroll.
+        var offsetLeft = 0;
+        var originalOffsetLeft = -1;
+
+        // This last offset used to move the element horizontally. This is used
+        // to determine if we need to move the element because we would not want
+        // to do that for no reason.
+        var lastOffsetLeft = -1;
+
+        // This is the element used to fill the void left by the target element
+        // when it goes fixed; otherwise, everything below it moves up the page.
+        var spacer = null;
+
+        var spacerClass;
+
+        var className;
+
+        // Capture the original offsets for the target element. This needs to be
+        // called whenever the page size changes or when the page is first
+        // scrolled. For some reason, calling this before the page is first
+        // scrolled causes the element to become fixed too late.
+        function resetScroll() {
+            // Set the element to it original positioning.
+            target.trigger('preUnfixed.ScrollToFixed');
+            setUnfixed();
+            target.trigger('unfixed.ScrollToFixed');
+
+            // Reset the last offset used to determine if the page has moved
+            // horizontally.
+            lastOffsetLeft = -1;
+
+            // Capture the offset top of the target element.
+            offsetTop = target.offset().top;
+
+            // Capture the offset left of the target element.
+            offsetLeft = target.offset().left;
+
+            // If the offsets option is on, alter the left offset.
+            if (base.options.offsets) {
+                offsetLeft += (target.offset().left - target.position().left);
+            }
+
+            if (originalOffsetLeft == -1) {
+                originalOffsetLeft = offsetLeft;
+            }
+
+            position = target.css('position');
+
+            // Set that this has been called at least once.
+            isReset = true;
+
+            if (base.options.bottom != -1) {
+                target.trigger('preFixed.ScrollToFixed');
+                setFixed();
+                target.trigger('fixed.ScrollToFixed');
+            }
+        }
+
+        function getLimit() {
+            var limit = base.options.limit;
+            if (!limit) return 0;
+
+            if (typeof(limit) === 'function') {
+                return limit.apply(target);
+            }
+            return limit;
+        }
+
+        // Returns whether the target element is fixed or not.
+        function isFixed() {
+            return position === 'fixed';
+        }
+
+        // Returns whether the target element is absolute or not.
+        function isAbsolute() {
+            return position === 'absolute';
+        }
+
+        function isUnfixed() {
+            return !(isFixed() || isAbsolute());
+        }
+
+        // Sets the target element to fixed. Also, sets the spacer to fill the
+        // void left by the target element.
+        function setFixed() {
+            // Only fix the target element and the spacer if we need to.
+            if (!isFixed()) {
+                //get REAL dimensions (decimal fix)
+                //Ref. http://stackoverflow.com/questions/3603065/how-to-make-jquery-to-not-round-value-returned-by-width
+                var dimensions = target[0].getBoundingClientRect();
+
+                // Set the spacer to fill the height and width of the target
+                // element, then display it.
+                spacer.css({
+                    'display' : target.css('display'),
+                    'width' : dimensions.width,
+                    'height' : dimensions.height,
+                    'float' : target.css('float')
+                });
+
+                // Set the target element to fixed and set its width so it does
+                // not fill the rest of the page horizontally. Also, set its top
+                // to the margin top specified in the options.
+
+                cssOptions={
+                    'z-index' : base.options.zIndex,
+                    'position' : 'fixed',
+                    'top' : base.options.bottom == -1?getMarginTop():'',
+                    'bottom' : base.options.bottom == -1?'':base.options.bottom,
+                    'margin-left' : '0px'
+                }
+                if (!base.options.dontSetWidth){ cssOptions['width']=target.css('width'); };
+
+                target.css(cssOptions);
+				target.removeClass('done');
+
+                target.addClass(base.options.baseClassName);
+
+                if (base.options.className) {
+                    target.addClass(base.options.className);
+                }
+
+                position = 'fixed';
+            }
+        }
+
+        function setAbsolute() {
+
+            var top = getLimit();
+            var left = offsetLeft;
+
+            if (base.options.removeOffsets) {
+                left = '';
+                top = top - offsetTop;
+            }
+
+            cssOptions={
+              'position' : 'absolute',
+              'top' : top,
+              'left' : left,
+              'margin-left' : '0px',
+              'bottom' : ''
+            }
+            if (!base.options.dontSetWidth){ cssOptions['width']=target.css('width'); };
+
+            target.css(cssOptions);
+			target.addClass('done');
+			
+            position = 'absolute';
+        }
+
+        // Sets the target element back to unfixed. Also, hides the spacer.
+        function setUnfixed() {
+            // Only unfix the target element and the spacer if we need to.
+            if (!isUnfixed()) {
+                lastOffsetLeft = -1;
+
+                // Hide the spacer now that the target element will fill the
+                // space.
+                spacer.css('display', 'none');
+
+                // Remove the style attributes that were added to the target.
+                // This will reverse the target back to the its original style.
+                target.css({
+                    'z-index' : originalZIndex,
+                    'width' : '',
+                    'position' : originalPosition,
+                    'left' : '',
+                    'top' : originalOffsetTop,
+                    'margin-left' : '',
+                });
+
+                target.removeClass('scroll-to-fixed-fixed');
+
+                if (base.options.className) {
+                    target.removeClass(base.options.className);
+                }
+
+                position = null;
+            }
+        }
+
+        // Moves the target element left or right relative to the horizontal
+        // scroll position.
+        function setLeft(x) {
+            // Only if the scroll is not what it was last time we did this.
+            if (x != lastOffsetLeft) {
+                // Move the target element horizontally relative to its original
+                // horizontal position.
+                target.css('left', offsetLeft - x);
+
+                // Hold the last horizontal position set.
+                lastOffsetLeft = x;
+            }
+        }
+
+        function getMarginTop() {
+            var marginTop = base.options.marginTop;
+            if (!marginTop) return 0;
+
+            if (typeof(marginTop) === 'function') {
+                return marginTop.apply(target);
+            }
+            return marginTop;
+        }
+
+        // Checks to see if we need to do something based on new scroll position
+        // of the page.
+        function checkScroll() {
+            if (!$.isScrollToFixed(target) || target.is(':hidden')) return;
+            var wasReset = isReset;
+            var wasUnfixed = isUnfixed();
+
+            // If resetScroll has not yet been called, call it. This only
+            // happens once.
+            if (!isReset) {
+                resetScroll();
+            } else if (isUnfixed()) {
+                // if the offset has changed since the last scroll,
+                // we need to get it again.
+
+                // Capture the offset top of the target element.
+                offsetTop = target.offset().top;
+
+                // Capture the offset left of the target element.
+                offsetLeft = target.offset().left;
+            }
+
+            // Grab the current horizontal scroll position.
+            var x = $(window).scrollLeft();
+
+            // Grab the current vertical scroll position.
+            var y = $(window).scrollTop();
+
+            // Get the limit, if there is one.
+            var limit = getLimit();
+
+            // If the vertical scroll position, plus the optional margin, would
+            // put the target element at the specified limit, set the target
+            // element to absolute.
+            if (base.options.minWidth && $(window).width() < base.options.minWidth) {
+                if (!isUnfixed() || !wasReset) {
+                    postPosition();
+                    target.trigger('preUnfixed.ScrollToFixed');
+                    setUnfixed();
+                    target.trigger('unfixed.ScrollToFixed');
+                }
+            } else if (base.options.maxWidth && $(window).width() > base.options.maxWidth) {
+                if (!isUnfixed() || !wasReset) {
+                    postPosition();
+                    target.trigger('preUnfixed.ScrollToFixed');
+                    setUnfixed();
+                    target.trigger('unfixed.ScrollToFixed');
+                }
+            } else if (base.options.bottom == -1) {
+                // If the vertical scroll position, plus the optional margin, would
+                // put the target element at the specified limit, set the target
+                // element to absolute.
+                if (limit > 0 && y >= limit - getMarginTop()) {
+                    if (!wasUnfixed && (!isAbsolute() || !wasReset)) {
+                        postPosition();
+                        target.trigger('preAbsolute.ScrollToFixed');
+                        setAbsolute();
+                        target.trigger('unfixed.ScrollToFixed');
+                    }
+                // If the vertical scroll position, plus the optional margin, would
+                // put the target element above the top of the page, set the target
+                // element to fixed.
+                } else if (y >= offsetTop - getMarginTop()) {
+                    if (!isFixed() || !wasReset) {
+                        postPosition();
+                        target.trigger('preFixed.ScrollToFixed');
+
+                        // Set the target element to fixed.
+                        setFixed();
+
+                        // Reset the last offset left because we just went fixed.
+                        lastOffsetLeft = -1;
+
+                        target.trigger('fixed.ScrollToFixed');
+                    }
+                    // If the page has been scrolled horizontally as well, move the
+                    // target element accordingly.
+                    setLeft(x);
+                } else {
+                    // Set the target element to unfixed, placing it where it was
+                    // before.
+                    if (!isUnfixed() || !wasReset) {
+                        postPosition();
+                        target.trigger('preUnfixed.ScrollToFixed');
+                        setUnfixed();
+                        target.trigger('unfixed.ScrollToFixed');
+                    }
+                }
+            } else {
+                if (limit > 0) {
+                    if (y + $(window).height() - target.outerHeight(true) >= limit - (getMarginTop() || -getBottom())) {
+                        if (isFixed()) {
+                            postPosition();
+                            target.trigger('preUnfixed.ScrollToFixed');
+
+                            if (originalPosition === 'absolute') {
+                                setAbsolute();
+                            } else {
+                                setUnfixed();
+                            }
+
+                            target.trigger('unfixed.ScrollToFixed');
+                        }
+                    } else {
+                        if (!isFixed()) {
+                            postPosition();
+                            target.trigger('preFixed.ScrollToFixed');
+                            setFixed();
+                        }
+                        setLeft(x);
+                        target.trigger('fixed.ScrollToFixed');
+                    }
+                } else {
+                    setLeft(x);
+                }
+            }
+        }
+
+        function getBottom() {
+            if (!base.options.bottom) return 0;
+            return base.options.bottom;
+        }
+
+        function postPosition() {
+            var position = target.css('position');
+
+            if (position == 'absolute') {
+                target.trigger('postAbsolute.ScrollToFixed');
+            } else if (position == 'fixed') {
+                target.trigger('postFixed.ScrollToFixed');
+            } else {
+                target.trigger('postUnfixed.ScrollToFixed');
+            }
+        }
+
+        var windowResize = function(event) {
+            // Check if the element is visible before updating it's position, which
+            // improves behavior with responsive designs where this element is hidden.
+            if(target.is(':visible')) {
+                isReset = false;
+                checkScroll();
+            } else {
+              // Ensure the spacer is hidden
+              setUnfixed();
+            }
+        }
+
+        var windowScroll = function(event) {
+            (!!window.requestAnimationFrame) ? requestAnimationFrame(checkScroll) : checkScroll();
+        }
+
+        // From: http://kangax.github.com/cft/#IS_POSITION_FIXED_SUPPORTED
+        var isPositionFixedSupported = function() {
+            var container = document.body;
+
+            if (document.createElement && container && container.appendChild && container.removeChild) {
+                var el = document.createElement('div');
+
+                if (!el.getBoundingClientRect) return null;
+
+                el.innerHTML = 'x';
+                el.style.cssText = 'position:fixed;top:100px;';
+                container.appendChild(el);
+
+                var originalHeight = container.style.height,
+                originalScrollTop = container.scrollTop;
+
+                container.style.height = '3000px';
+                container.scrollTop = 500;
+
+                var elementTop = el.getBoundingClientRect().top;
+                container.style.height = originalHeight;
+
+                var isSupported = (elementTop === 100);
+                container.removeChild(el);
+                container.scrollTop = originalScrollTop;
+
+                return isSupported;
+            }
+
+            return null;
+        }
+
+        var preventDefault = function(e) {
+            e = e || window.event;
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.returnValue = false;
+        }
+
+        // Initializes this plugin. Captures the options passed in, turns this
+        // off for devices that do not support fixed position, adds the spacer,
+        // and binds to the window scroll and resize events.
+        base.init = function() {
+            // Capture the options for this plugin.
+            base.options = $.extend({}, $.ScrollToFixed.defaultOptions, options);
+
+            originalZIndex = target.css('z-index')
+
+            // Turn off this functionality for devices that do not support it.
+            // if (!(base.options && base.options.dontCheckForPositionFixedSupport)) {
+            //     var fixedSupported = isPositionFixedSupported();
+            //     if (!fixedSupported) return;
+            // }
+
+            // Put the target element on top of everything that could be below
+            // it. This reduces flicker when the target element is transitioning
+            // to fixed.
+            base.$el.css('z-index', base.options.zIndex);
+
+            // Create a spacer element to fill the void left by the target
+            // element when it goes fixed.
+            spacer = $('<div />');
+
+            position = target.css('position');
+            originalPosition = target.css('position');
+            originalFloat = target.css('float');
+            originalOffsetTop = target.css('top');
+
+            // Place the spacer right after the target element.
+            if (isUnfixed()) base.$el.after(spacer);
+
+            // Reset the target element offsets when the window is resized, then
+            // check to see if we need to fix or unfix the target element.
+            $(window).bind('resize.ScrollToFixed', windowResize);
+
+            // When the window scrolls, check to see if we need to fix or unfix
+            // the target element.
+            $(window).bind('scroll.ScrollToFixed', windowScroll);
+
+            // For touch devices, call checkScroll directlly rather than
+            // rAF wrapped windowScroll to animate the element
+            if ('ontouchmove' in window) {
+              $(window).bind('touchmove.ScrollToFixed', checkScroll);
+            }
+
+            if (base.options.preFixed) {
+                target.bind('preFixed.ScrollToFixed', base.options.preFixed);
+            }
+            if (base.options.postFixed) {
+                target.bind('postFixed.ScrollToFixed', base.options.postFixed);
+            }
+            if (base.options.preUnfixed) {
+                target.bind('preUnfixed.ScrollToFixed', base.options.preUnfixed);
+            }
+            if (base.options.postUnfixed) {
+                target.bind('postUnfixed.ScrollToFixed', base.options.postUnfixed);
+            }
+            if (base.options.preAbsolute) {
+                target.bind('preAbsolute.ScrollToFixed', base.options.preAbsolute);
+            }
+            if (base.options.postAbsolute) {
+                target.bind('postAbsolute.ScrollToFixed', base.options.postAbsolute);
+            }
+            if (base.options.fixed) {
+                target.bind('fixed.ScrollToFixed', base.options.fixed);
+            }
+            if (base.options.unfixed) {
+                target.bind('unfixed.ScrollToFixed', base.options.unfixed);
+            }
+
+            if (base.options.spacerClass) {
+                spacer.addClass(base.options.spacerClass);
+            }
+
+            target.bind('resize.ScrollToFixed', function() {
+                spacer.height(target.height());
+            });
+
+            target.bind('scroll.ScrollToFixed', function() {
+                target.trigger('preUnfixed.ScrollToFixed');
+                setUnfixed();
+                target.trigger('unfixed.ScrollToFixed');
+                checkScroll();
+            });
+
+            target.bind('detach.ScrollToFixed', function(ev) {
+                preventDefault(ev);
+
+                target.trigger('preUnfixed.ScrollToFixed');
+                setUnfixed();
+                target.trigger('unfixed.ScrollToFixed');
+
+                $(window).unbind('resize.ScrollToFixed', windowResize);
+                $(window).unbind('scroll.ScrollToFixed', windowScroll);
+
+                target.unbind('.ScrollToFixed');
+
+                //remove spacer from dom
+                spacer.remove();
+
+                base.$el.removeData('ScrollToFixed');
+            });
+
+            // Reset everything.
+            windowResize();
+        };
+
+        // Initialize the plugin.
+        base.init();
+    };
+
+    // Sets the option defaults.
+    $.ScrollToFixed.defaultOptions = {
+        marginTop : 0,
+        limit : 0,
+        bottom : -1,
+        zIndex : 1000,
+        baseClassName: 'scroll-to-fixed-fixed'
+    };
+
+    // Returns enhanced elements that will fix to the top of the page when the
+    // page is scrolled.
+    $.fn.scrollToFixed = function(options) {
+        return this.each(function() {
+            (new $.ScrollToFixed(this, options));
+        });
+    };
+})(jQuery);
+/*!
+	jQuery Waypoints
+	Copyright	Caleb Troughton
+	License		MIT
+	Version		2.0.3
+
+	https://github.com/imakewebthings/waypoints
+*/
+(function(){var t=[].indexOf||function(t){for(var e=0,n=this.length;e<n;e++){if(e in this&&this[e]===t)return e}return-1},e=[].slice;(function(t,e){if(typeof define==="function"&&define.amd){return define("waypoints",["jquery"],function(n){return e(n,t)})}else{return e(t.jQuery,t)}})(this,function(n,r){var i,o,l,s,f,u,a,c,h,d,p,y,v,w,g,m;i=n(r);c=t.call(r,"ontouchstart")>=0;s={horizontal:{},vertical:{}};f=1;a={};u="waypoints-context-id";p="resize.waypoints";y="scroll.waypoints";v=1;w="waypoints-waypoint-ids";g="waypoint";m="waypoints";o=function(){function t(t){var e=this;this.$element=t;this.element=t[0];this.didResize=false;this.didScroll=false;this.id="context"+f++;this.oldScroll={x:t.scrollLeft(),y:t.scrollTop()};this.waypoints={horizontal:{},vertical:{}};t.data(u,this.id);a[this.id]=this;t.bind(y,function(){var t;if(!(e.didScroll||c)){e.didScroll=true;t=function(){e.doScroll();return e.didScroll=false};return r.setTimeout(t,n[m].settings.scrollThrottle)}});t.bind(p,function(){var t;if(!e.didResize){e.didResize=true;t=function(){n[m]("refresh");return e.didResize=false};return r.setTimeout(t,n[m].settings.resizeThrottle)}})}t.prototype.doScroll=function(){var t,e=this;t={horizontal:{newScroll:this.$element.scrollLeft(),oldScroll:this.oldScroll.x,forward:"right",backward:"left"},vertical:{newScroll:this.$element.scrollTop(),oldScroll:this.oldScroll.y,forward:"down",backward:"up"}};if(c&&(!t.vertical.oldScroll||!t.vertical.newScroll)){n[m]("refresh")}n.each(t,function(t,r){var i,o,l;l=[];o=r.newScroll>r.oldScroll;i=o?r.forward:r.backward;n.each(e.waypoints[t],function(t,e){var n,i;if(r.oldScroll<(n=e.offset)&&n<=r.newScroll){return l.push(e)}else if(r.newScroll<(i=e.offset)&&i<=r.oldScroll){return l.push(e)}});l.sort(function(t,e){return t.offset-e.offset});if(!o){l.reverse()}return n.each(l,function(t,e){if(e.options.continuous||t===l.length-1){return e.trigger([i])}})});return this.oldScroll={x:t.horizontal.newScroll,y:t.vertical.newScroll}};t.prototype.refresh=function(){var t,e,r,i=this;r=n.isWindow(this.element);e=this.$element.offset();this.doScroll();t={horizontal:{contextOffset:r?0:e.left,contextScroll:r?0:this.oldScroll.x,contextDimension:this.$element.width(),oldScroll:this.oldScroll.x,forward:"right",backward:"left",offsetProp:"left"},vertical:{contextOffset:r?0:e.top,contextScroll:r?0:this.oldScroll.y,contextDimension:r?n[m]("viewportHeight"):this.$element.height(),oldScroll:this.oldScroll.y,forward:"down",backward:"up",offsetProp:"top"}};return n.each(t,function(t,e){return n.each(i.waypoints[t],function(t,r){var i,o,l,s,f;i=r.options.offset;l=r.offset;o=n.isWindow(r.element)?0:r.$element.offset()[e.offsetProp];if(n.isFunction(i)){i=i.apply(r.element)}else if(typeof i==="string"){i=parseFloat(i);if(r.options.offset.indexOf("%")>-1){i=Math.ceil(e.contextDimension*i/100)}}r.offset=o-e.contextOffset+e.contextScroll-i;if(r.options.onlyOnScroll&&l!=null||!r.enabled){return}if(l!==null&&l<(s=e.oldScroll)&&s<=r.offset){return r.trigger([e.backward])}else if(l!==null&&l>(f=e.oldScroll)&&f>=r.offset){return r.trigger([e.forward])}else if(l===null&&e.oldScroll>=r.offset){return r.trigger([e.forward])}})})};t.prototype.checkEmpty=function(){if(n.isEmptyObject(this.waypoints.horizontal)&&n.isEmptyObject(this.waypoints.vertical)){this.$element.unbind([p,y].join(" "));return delete a[this.id]}};return t}();l=function(){function t(t,e,r){var i,o;r=n.extend({},n.fn[g].defaults,r);if(r.offset==="bottom-in-view"){r.offset=function(){var t;t=n[m]("viewportHeight");if(!n.isWindow(e.element)){t=e.$element.height()}return t-n(this).outerHeight()}}this.$element=t;this.element=t[0];this.axis=r.horizontal?"horizontal":"vertical";this.callback=r.handler;this.context=e;this.enabled=r.enabled;this.id="waypoints"+v++;this.offset=null;this.options=r;e.waypoints[this.axis][this.id]=this;s[this.axis][this.id]=this;i=(o=t.data(w))!=null?o:[];i.push(this.id);t.data(w,i)}t.prototype.trigger=function(t){if(!this.enabled){return}if(this.callback!=null){this.callback.apply(this.element,t)}if(this.options.triggerOnce){return this.destroy()}};t.prototype.disable=function(){return this.enabled=false};t.prototype.enable=function(){this.context.refresh();return this.enabled=true};t.prototype.destroy=function(){delete s[this.axis][this.id];delete this.context.waypoints[this.axis][this.id];return this.context.checkEmpty()};t.getWaypointsByElement=function(t){var e,r;r=n(t).data(w);if(!r){return[]}e=n.extend({},s.horizontal,s.vertical);return n.map(r,function(t){return e[t]})};return t}();d={init:function(t,e){var r;if(e==null){e={}}if((r=e.handler)==null){e.handler=t}this.each(function(){var t,r,i,s;t=n(this);i=(s=e.context)!=null?s:n.fn[g].defaults.context;if(!n.isWindow(i)){i=t.closest(i)}i=n(i);r=a[i.data(u)];if(!r){r=new o(i)}return new l(t,r,e)});n[m]("refresh");return this},disable:function(){return d._invoke(this,"disable")},enable:function(){return d._invoke(this,"enable")},destroy:function(){return d._invoke(this,"destroy")},prev:function(t,e){return d._traverse.call(this,t,e,function(t,e,n){if(e>0){return t.push(n[e-1])}})},next:function(t,e){return d._traverse.call(this,t,e,function(t,e,n){if(e<n.length-1){return t.push(n[e+1])}})},_traverse:function(t,e,i){var o,l;if(t==null){t="vertical"}if(e==null){e=r}l=h.aggregate(e);o=[];this.each(function(){var e;e=n.inArray(this,l[t]);return i(o,e,l[t])});return this.pushStack(o)},_invoke:function(t,e){t.each(function(){var t;t=l.getWaypointsByElement(this);return n.each(t,function(t,n){n[e]();return true})});return this}};n.fn[g]=function(){var t,r;r=arguments[0],t=2<=arguments.length?e.call(arguments,1):[];if(d[r]){return d[r].apply(this,t)}else if(n.isFunction(r)){return d.init.apply(this,arguments)}else if(n.isPlainObject(r)){return d.init.apply(this,[null,r])}else if(!r){return n.error("jQuery Waypoints needs a callback function or handler option.")}else{return n.error("The "+r+" method does not exist in jQuery Waypoints.")}};n.fn[g].defaults={context:r,continuous:true,enabled:true,horizontal:false,offset:0,triggerOnce:false};h={refresh:function(){return n.each(a,function(t,e){return e.refresh()})},viewportHeight:function(){var t;return(t=r.innerHeight)!=null?t:i.height()},aggregate:function(t){var e,r,i;e=s;if(t){e=(i=a[n(t).data(u)])!=null?i.waypoints:void 0}if(!e){return[]}r={horizontal:[],vertical:[]};n.each(r,function(t,i){n.each(e[t],function(t,e){return i.push(e)});i.sort(function(t,e){return t.offset-e.offset});r[t]=n.map(i,function(t){return t.element});return r[t]=n.unique(r[t])});return r},above:function(t){if(t==null){t=r}return h._filter(t,"vertical",function(t,e){return e.offset<=t.oldScroll.y})},below:function(t){if(t==null){t=r}return h._filter(t,"vertical",function(t,e){return e.offset>t.oldScroll.y})},left:function(t){if(t==null){t=r}return h._filter(t,"horizontal",function(t,e){return e.offset<=t.oldScroll.x})},right:function(t){if(t==null){t=r}return h._filter(t,"horizontal",function(t,e){return e.offset>t.oldScroll.x})},enable:function(){return h._invoke("enable")},disable:function(){return h._invoke("disable")},destroy:function(){return h._invoke("destroy")},extendFn:function(t,e){return d[t]=e},_invoke:function(t){var e;e=n.extend({},s.vertical,s.horizontal);return n.each(e,function(e,n){n[t]();return true})},_filter:function(t,e,r){var i,o;i=a[n(t).data(u)];if(!i){return[]}o=[];n.each(i.waypoints[e],function(t,e){if(r(i,e)){return o.push(e)}});o.sort(function(t,e){return t.offset-e.offset});return n.map(o,function(t){return t.element})}};n[m]=function(){var t,n;n=arguments[0],t=2<=arguments.length?e.call(arguments,1):[];if(h[n]){return h[n].apply(null,t)}else{return h.aggregate.call(null,n)}};n[m].settings={resizeThrottle:100,scrollThrottle:30};return i.load(function(){return n[m]("refresh")})})}).call(this);
+/*!
  * Scripts
  */
 head.ready(function() {
@@ -195,12 +774,36 @@ head.ready(function() {
 				$('[class*="accordion"] > :header').on('click',function(){ $(this).toggleClass('toggle').next().slideToggle(); });
 			},
 			sliders : function(){
-				$('.slider-a > .inner').each(function(){ 
+				/*$('.slider-a > .inner').each(function(){ 
 					var slider = $(this).bxSlider({ pager: true, controls: true, useCSS: false, mode: 'fade' });
 					$(this).on('mousewheel',function(event, delta, deltaX, deltaY) {
 						if (delta > 0){ if(!$(this).find('[aria-hidden="false"]').is(':first-child')){ slider.goToPrevSlide(); event.stopPropagation(); event.preventDefault();	}}
 						if (deltaY < 0){ if(!$(this).find('[aria-hidden="false"]').is(':last-child')){ slider.goToNextSlide(); event.stopPropagation(); event.preventDefault(); }}					
 					});
+				});*/
+				$('.slider-a').append('<div class="pager" style="height:'+$(window).height()+'px;"><ul></ul></div>');				
+				$('.slider-a').each(function(){ 
+					to=1; $(this).find('article').each(function(){ 
+						$(this).attr('id','item-'+to).append('<a class="hidden" href="#item-'+to+'">Item '+to+'</a>'); to++;
+						$(this).children('a.hidden').clone().removeClass('hidden').wrap('<li></li>').parent().appendTo($(this).parents('.slider-a').children('.pager').children('ul'));
+					});
+				});
+				$('.slider-a .pager li:first-child a').addClass('active');
+				$('.slider-a .pager a').on('click',function(){
+					$(this).parents('.slider-a').find('.pager').find('a.active').removeClass('active');
+					$(this).addClass('active');
+				});
+				$('.slider-a .pager').scrollToFixed({ limit: $('.slider-a + *').offset().top-$('.slider-a .inner').outerHeight()+$(window).height() });
+				
+				$('.slider-a article').each(function(){ 
+					$(this).waypoint(function() { 
+						$(this).parents('.slider-a').find('.pager').find('a.active').removeClass('active');
+						$(this).parents('.slider-a').find('.pager').find('a[href=#'+$(this).attr('id')+']').addClass('active');
+					}, { offset: '49%' }); 
+					$(this).waypoint(function() { 
+						$(this).parents('.slider-a').find('.pager').find('a.active').removeClass('active');
+						$(this).parents('.slider-a').find('.pager').find('a[href=#'+$(this).attr('id')+']').addClass('active');					
+					}, { offset: '-49%' }); 
 				});
 				$('#featured > .inner').each(function(){ 
 					$(this).bxSlider({ 
