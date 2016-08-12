@@ -8,7 +8,7 @@
 * { margin: 0; padding: 0; }
 *, :before, :after { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; -o-box-sizing: border-box; -ms-box-sizing: border-box; box-sizing: border-box; }
 
-html { overflow-x: hidden; overflow-y: scroll; min-height: 100%; margin: 0 0 1px; font-size: 100.01%; -webkit-tap-highlight-color: rgba(0,0,0,0); -moz-osx-font-smoothing: grayscale; -webkit-overflow-scrolling: touch; -ms-content-zooming: none; }
+html { overflow-x: hidden; overflow-y: scroll; min-height: 100%; margin: 0 0 1px; background: #fff; font-size: 100.01%; -webkit-tap-highlight-color: rgba(0,0,0,0); -moz-osx-font-smoothing: grayscale; -webkit-overflow-scrolling: touch; -ms-content-zooming: none; }
 body { min-height: 100%; background: #fff; font-size: 62.5%; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
 
 body, textarea, input, select, option, button { color: #555; font-family: 'Open Sans', Arial, Helvetica, sans-serif; line-height: 1.66666666666; }
@@ -167,9 +167,9 @@ article, aside, details, div, figcaption, figure, footer, header, hgroup, main, 
 			#footer .social-a a { background: #fff; color: #383838; }
 				#footer .social-a a:hover, #social .social-a li a:hover { background: #FF5252; color: #fff; }
 	#root, #intro { -moz-transform: translateX(100%); -webkit-transform: translateX(100%); -o-transform: translateX(100%); -ms-transform: translateX(100%); transform: translateX(100%); }
-		.domloaded #root, .domloaded #intro { -moz-transform: translateX(0); -webkit-transform: translateX(0); -o-transform: translateX(0); -ms-transform: translateX(0); transform: translateX(0); }
+		.domloaded #root, .domloaded #intro { -moz-transform: none; -webkit-transform: none; -o-transform: none; -ms-transform: none; transform: none; }
 		.clicked #root, .clicked #intro { -moz-transform: translateX(-100%); -webkit-transform: translateX(-100%); -o-transform: translateX(-100%); -ms-transform: translateX(-100%); transform: translateX(-100%); }
-			
+
 
 /*! Columns --------- */
 
@@ -234,7 +234,7 @@ article, aside, details, div, figcaption, figure, footer, header, hgroup, main, 
 		.slider-a .bx-pager .bx-pager-item a.active, .slider-a .pager ul li a.active { cursor: default; }
 			.slider-a .bx-pager .bx-pager-item a.active:before, .slider-a .pager ul li .active:before { background: none; }
 			.slider-a .bx-pager .bx-pager-item a.active:before, .slider-a .pager ul li .active:before { -moz-transform: scale(2.14285714286,2.14285714286); -webkit-transform: scale(2.14285714286,2.14285714286); -o-transform: scale(2.14285714286,2.14285714286); -ms-transform: scale(2.14285714286,2.14285714286); transform: scale(2.14285714286,2.14285714286); }
-	.slider-a .pager { display: block; position: absolute; right: 56px; top: 0; z-index: 900; }
+	.slider-a .pager { display: block; position: absolute; right: 56px; top: 0; z-index: 11900; }
 		.slider-a .pager ul { right: 0; }
 		.slider-a .pager:before { content: ""; display: block; position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 901; }
 		.slider-a .pager.done { top: auto !important; bottom: 0; }

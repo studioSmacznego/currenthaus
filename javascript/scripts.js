@@ -206,7 +206,7 @@ head.ready(function() {
 				if($.browser.mobile){
 						
 				} else {
-					$('a[href^="#"]:not(.inside-slider-a)').on('click',function(e){ 
+					$('a[href^="#"]').on('click',function(e){ 
 						$('html, body').animate({'scrollTop': $($(this).attr('href')).offset().top}); 
 						e.preventDefault(); 
 					});					
