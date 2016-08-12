@@ -104,568 +104,7 @@ eval(function(p,a,c,k,e,r){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a
 
 	https://github.com/bigspotteddog/ScrollToFixed
 */
-(function($) {
-    $.isScrollToFixed = function(el) {
-        return !!$(el).data('ScrollToFixed');
-    };
-
-    $.ScrollToFixed = function(el, options) {
-        // To avoid scope issues, use 'base' instead of 'this' to reference this
-        // class from internal events and functions.
-        var base = this;
-
-        // Access to jQuery and DOM versions of element.
-        base.$el = $(el);
-        base.el = el;
-
-        // Add a reverse reference to the DOM object.
-        base.$el.data('ScrollToFixed', base);
-
-        // A flag so we know if the scroll has been reset.
-        var isReset = false;
-
-        // The element that was given to us to fix if scrolled above the top of
-        // the page.
-        var target = base.$el;
-
-        var position;
-        var originalPosition;
-        var originalFloat;
-        var originalOffsetTop;
-        var originalZIndex;
-
-        // The offset top of the element when resetScroll was called. This is
-        // used to determine if we have scrolled past the top of the element.
-        var offsetTop = 0;
-
-        // The offset left of the element when resetScroll was called. This is
-        // used to move the element left or right relative to the horizontal
-        // scroll.
-        var offsetLeft = 0;
-        var originalOffsetLeft = -1;
-
-        // This last offset used to move the element horizontally. This is used
-        // to determine if we need to move the element because we would not want
-        // to do that for no reason.
-        var lastOffsetLeft = -1;
-
-        // This is the element used to fill the void left by the target element
-        // when it goes fixed; otherwise, everything below it moves up the page.
-        var spacer = null;
-
-        var spacerClass;
-
-        var className;
-
-        // Capture the original offsets for the target element. This needs to be
-        // called whenever the page size changes or when the page is first
-        // scrolled. For some reason, calling this before the page is first
-        // scrolled causes the element to become fixed too late.
-        function resetScroll() {
-            // Set the element to it original positioning.
-            target.trigger('preUnfixed.ScrollToFixed');
-            setUnfixed();
-            target.trigger('unfixed.ScrollToFixed');
-
-            // Reset the last offset used to determine if the page has moved
-            // horizontally.
-            lastOffsetLeft = -1;
-
-            // Capture the offset top of the target element.
-            offsetTop = target.offset().top;
-
-            // Capture the offset left of the target element.
-            offsetLeft = target.offset().left;
-
-            // If the offsets option is on, alter the left offset.
-            if (base.options.offsets) {
-                offsetLeft += (target.offset().left - target.position().left);
-            }
-
-            if (originalOffsetLeft == -1) {
-                originalOffsetLeft = offsetLeft;
-            }
-
-            position = target.css('position');
-
-            // Set that this has been called at least once.
-            isReset = true;
-
-            if (base.options.bottom != -1) {
-                target.trigger('preFixed.ScrollToFixed');
-                setFixed();
-                target.trigger('fixed.ScrollToFixed');
-            }
-        }
-
-        function getLimit() {
-            var limit = base.options.limit;
-            if (!limit) return 0;
-
-            if (typeof(limit) === 'function') {
-                return limit.apply(target);
-            }
-            return limit;
-        }
-
-        // Returns whether the target element is fixed or not.
-        function isFixed() {
-            return position === 'fixed';
-        }
-
-        // Returns whether the target element is absolute or not.
-        function isAbsolute() {
-            return position === 'absolute';
-        }
-
-        function isUnfixed() {
-            return !(isFixed() || isAbsolute());
-        }
-
-        // Sets the target element to fixed. Also, sets the spacer to fill the
-        // void left by the target element.
-        function setFixed() {
-            // Only fix the target element and the spacer if we need to.
-            if (!isFixed()) {
-                //get REAL dimensions (decimal fix)
-                //Ref. http://stackoverflow.com/questions/3603065/how-to-make-jquery-to-not-round-value-returned-by-width
-                var dimensions = target[0].getBoundingClientRect();
-
-                // Set the spacer to fill the height and width of the target
-                // element, then display it.
-                spacer.css({
-                    'display' : target.css('display'),
-                    'width' : dimensions.width,
-                    'height' : dimensions.height,
-                    'float' : target.css('float')
-                });
-
-                // Set the target element to fixed and set its width so it does
-                // not fill the rest of the page horizontally. Also, set its top
-                // to the margin top specified in the options.
-
-                cssOptions={
-                    'z-index' : base.options.zIndex,
-                    'position' : 'fixed',
-                    'top' : base.options.bottom == -1?getMarginTop():'',
-                    'bottom' : base.options.bottom == -1?'':base.options.bottom,
-                    'margin-left' : '0px'
-                }
-                if (!base.options.dontSetWidth){ cssOptions['width']=target.css('width'); };
-
-                target.css(cssOptions);
-				target.removeClass('done');
-
-                target.addClass(base.options.baseClassName);
-
-                if (base.options.className) {
-                    target.addClass(base.options.className);
-                }
-
-                position = 'fixed';
-            }
-        }
-
-        function setAbsolute() {
-
-            var top = getLimit();
-            var left = offsetLeft;
-
-            if (base.options.removeOffsets) {
-                left = '';
-                top = top - offsetTop;
-            }
-
-            cssOptions={
-              'position' : 'absolute',
-              'top' : top,
-              'left' : left,
-              'margin-left' : '0px',
-              'bottom' : ''
-            }
-            if (!base.options.dontSetWidth){ cssOptions['width']=target.css('width'); };
-
-            target.css(cssOptions);
-			target.addClass('done');
-			
-            position = 'absolute';
-        }
-
-        // Sets the target element back to unfixed. Also, hides the spacer.
-        function setUnfixed() {
-            // Only unfix the target element and the spacer if we need to.
-            if (!isUnfixed()) {
-                lastOffsetLeft = -1;
-
-                // Hide the spacer now that the target element will fill the
-                // space.
-                spacer.css('display', 'none');
-
-                // Remove the style attributes that were added to the target.
-                // This will reverse the target back to the its original style.
-                target.css({
-                    'z-index' : originalZIndex,
-                    'width' : '',
-                    'position' : originalPosition,
-                    'left' : '',
-                    'top' : originalOffsetTop,
-                    'margin-left' : '',
-                });
-
-                target.removeClass('scroll-to-fixed-fixed');
-
-                if (base.options.className) {
-                    target.removeClass(base.options.className);
-                }
-
-                position = null;
-            }
-        }
-
-        // Moves the target element left or right relative to the horizontal
-        // scroll position.
-        function setLeft(x) {
-            // Only if the scroll is not what it was last time we did this.
-            if (x != lastOffsetLeft) {
-                // Move the target element horizontally relative to its original
-                // horizontal position.
-                target.css('left', offsetLeft - x);
-
-                // Hold the last horizontal position set.
-                lastOffsetLeft = x;
-            }
-        }
-
-        function getMarginTop() {
-            var marginTop = base.options.marginTop;
-            if (!marginTop) return 0;
-
-            if (typeof(marginTop) === 'function') {
-                return marginTop.apply(target);
-            }
-            return marginTop;
-        }
-
-        // Checks to see if we need to do something based on new scroll position
-        // of the page.
-        function checkScroll() {
-            if (!$.isScrollToFixed(target) || target.is(':hidden')) return;
-            var wasReset = isReset;
-            var wasUnfixed = isUnfixed();
-
-            // If resetScroll has not yet been called, call it. This only
-            // happens once.
-            if (!isReset) {
-                resetScroll();
-            } else if (isUnfixed()) {
-                // if the offset has changed since the last scroll,
-                // we need to get it again.
-
-                // Capture the offset top of the target element.
-                offsetTop = target.offset().top;
-
-                // Capture the offset left of the target element.
-                offsetLeft = target.offset().left;
-            }
-
-            // Grab the current horizontal scroll position.
-            var x = $(window).scrollLeft();
-
-            // Grab the current vertical scroll position.
-            var y = $(window).scrollTop();
-
-            // Get the limit, if there is one.
-            var limit = getLimit();
-
-            // If the vertical scroll position, plus the optional margin, would
-            // put the target element at the specified limit, set the target
-            // element to absolute.
-            if (base.options.minWidth && $(window).width() < base.options.minWidth) {
-                if (!isUnfixed() || !wasReset) {
-                    postPosition();
-                    target.trigger('preUnfixed.ScrollToFixed');
-                    setUnfixed();
-                    target.trigger('unfixed.ScrollToFixed');
-                }
-            } else if (base.options.maxWidth && $(window).width() > base.options.maxWidth) {
-                if (!isUnfixed() || !wasReset) {
-                    postPosition();
-                    target.trigger('preUnfixed.ScrollToFixed');
-                    setUnfixed();
-                    target.trigger('unfixed.ScrollToFixed');
-                }
-            } else if (base.options.bottom == -1) {
-                // If the vertical scroll position, plus the optional margin, would
-                // put the target element at the specified limit, set the target
-                // element to absolute.
-                if (limit > 0 && y >= limit - getMarginTop()) {
-                    if (!wasUnfixed && (!isAbsolute() || !wasReset)) {
-                        postPosition();
-                        target.trigger('preAbsolute.ScrollToFixed');
-                        setAbsolute();
-                        target.trigger('unfixed.ScrollToFixed');
-                    }
-                // If the vertical scroll position, plus the optional margin, would
-                // put the target element above the top of the page, set the target
-                // element to fixed.
-                } else if (y >= offsetTop - getMarginTop()) {
-                    if (!isFixed() || !wasReset) {
-                        postPosition();
-                        target.trigger('preFixed.ScrollToFixed');
-
-                        // Set the target element to fixed.
-                        setFixed();
-
-                        // Reset the last offset left because we just went fixed.
-                        lastOffsetLeft = -1;
-
-                        target.trigger('fixed.ScrollToFixed');
-                    }
-                    // If the page has been scrolled horizontally as well, move the
-                    // target element accordingly.
-                    setLeft(x);
-                } else {
-                    // Set the target element to unfixed, placing it where it was
-                    // before.
-                    if (!isUnfixed() || !wasReset) {
-                        postPosition();
-                        target.trigger('preUnfixed.ScrollToFixed');
-                        setUnfixed();
-                        target.trigger('unfixed.ScrollToFixed');
-                    }
-                }
-            } else {
-                if (limit > 0) {
-                    if (y + $(window).height() - target.outerHeight(true) >= limit - (getMarginTop() || -getBottom())) {
-                        if (isFixed()) {
-                            postPosition();
-                            target.trigger('preUnfixed.ScrollToFixed');
-
-                            if (originalPosition === 'absolute') {
-                                setAbsolute();
-                            } else {
-                                setUnfixed();
-                            }
-
-                            target.trigger('unfixed.ScrollToFixed');
-                        }
-                    } else {
-                        if (!isFixed()) {
-                            postPosition();
-                            target.trigger('preFixed.ScrollToFixed');
-                            setFixed();
-                        }
-                        setLeft(x);
-                        target.trigger('fixed.ScrollToFixed');
-                    }
-                } else {
-                    setLeft(x);
-                }
-            }
-        }
-
-        function getBottom() {
-            if (!base.options.bottom) return 0;
-            return base.options.bottom;
-        }
-
-        function postPosition() {
-            var position = target.css('position');
-
-            if (position == 'absolute') {
-                target.trigger('postAbsolute.ScrollToFixed');
-            } else if (position == 'fixed') {
-                target.trigger('postFixed.ScrollToFixed');
-            } else {
-                target.trigger('postUnfixed.ScrollToFixed');
-            }
-        }
-
-        var windowResize = function(event) {
-            // Check if the element is visible before updating it's position, which
-            // improves behavior with responsive designs where this element is hidden.
-            if(target.is(':visible')) {
-                isReset = false;
-                checkScroll();
-            } else {
-              // Ensure the spacer is hidden
-              setUnfixed();
-            }
-        }
-
-        var windowScroll = function(event) {
-            (!!window.requestAnimationFrame) ? requestAnimationFrame(checkScroll) : checkScroll();
-        }
-
-        // From: http://kangax.github.com/cft/#IS_POSITION_FIXED_SUPPORTED
-        var isPositionFixedSupported = function() {
-            var container = document.body;
-
-            if (document.createElement && container && container.appendChild && container.removeChild) {
-                var el = document.createElement('div');
-
-                if (!el.getBoundingClientRect) return null;
-
-                el.innerHTML = 'x';
-                el.style.cssText = 'position:fixed;top:100px;';
-                container.appendChild(el);
-
-                var originalHeight = container.style.height,
-                originalScrollTop = container.scrollTop;
-
-                container.style.height = '3000px';
-                container.scrollTop = 500;
-
-                var elementTop = el.getBoundingClientRect().top;
-                container.style.height = originalHeight;
-
-                var isSupported = (elementTop === 100);
-                container.removeChild(el);
-                container.scrollTop = originalScrollTop;
-
-                return isSupported;
-            }
-
-            return null;
-        }
-
-        var preventDefault = function(e) {
-            e = e || window.event;
-            if (e.preventDefault) {
-                e.preventDefault();
-            }
-            e.returnValue = false;
-        }
-
-        // Initializes this plugin. Captures the options passed in, turns this
-        // off for devices that do not support fixed position, adds the spacer,
-        // and binds to the window scroll and resize events.
-        base.init = function() {
-            // Capture the options for this plugin.
-            base.options = $.extend({}, $.ScrollToFixed.defaultOptions, options);
-
-            originalZIndex = target.css('z-index')
-
-            // Turn off this functionality for devices that do not support it.
-            // if (!(base.options && base.options.dontCheckForPositionFixedSupport)) {
-            //     var fixedSupported = isPositionFixedSupported();
-            //     if (!fixedSupported) return;
-            // }
-
-            // Put the target element on top of everything that could be below
-            // it. This reduces flicker when the target element is transitioning
-            // to fixed.
-            base.$el.css('z-index', base.options.zIndex);
-
-            // Create a spacer element to fill the void left by the target
-            // element when it goes fixed.
-            spacer = $('<div />');
-
-            position = target.css('position');
-            originalPosition = target.css('position');
-            originalFloat = target.css('float');
-            originalOffsetTop = target.css('top');
-
-            // Place the spacer right after the target element.
-            if (isUnfixed()) base.$el.after(spacer);
-
-            // Reset the target element offsets when the window is resized, then
-            // check to see if we need to fix or unfix the target element.
-            $(window).bind('resize.ScrollToFixed', windowResize);
-
-            // When the window scrolls, check to see if we need to fix or unfix
-            // the target element.
-            $(window).bind('scroll.ScrollToFixed', windowScroll);
-
-            // For touch devices, call checkScroll directlly rather than
-            // rAF wrapped windowScroll to animate the element
-            if ('ontouchmove' in window) {
-              $(window).bind('touchmove.ScrollToFixed', checkScroll);
-            }
-
-            if (base.options.preFixed) {
-                target.bind('preFixed.ScrollToFixed', base.options.preFixed);
-            }
-            if (base.options.postFixed) {
-                target.bind('postFixed.ScrollToFixed', base.options.postFixed);
-            }
-            if (base.options.preUnfixed) {
-                target.bind('preUnfixed.ScrollToFixed', base.options.preUnfixed);
-            }
-            if (base.options.postUnfixed) {
-                target.bind('postUnfixed.ScrollToFixed', base.options.postUnfixed);
-            }
-            if (base.options.preAbsolute) {
-                target.bind('preAbsolute.ScrollToFixed', base.options.preAbsolute);
-            }
-            if (base.options.postAbsolute) {
-                target.bind('postAbsolute.ScrollToFixed', base.options.postAbsolute);
-            }
-            if (base.options.fixed) {
-                target.bind('fixed.ScrollToFixed', base.options.fixed);
-            }
-            if (base.options.unfixed) {
-                target.bind('unfixed.ScrollToFixed', base.options.unfixed);
-            }
-
-            if (base.options.spacerClass) {
-                spacer.addClass(base.options.spacerClass);
-            }
-
-            target.bind('resize.ScrollToFixed', function() {
-                spacer.height(target.height());
-            });
-
-            target.bind('scroll.ScrollToFixed', function() {
-                target.trigger('preUnfixed.ScrollToFixed');
-                setUnfixed();
-                target.trigger('unfixed.ScrollToFixed');
-                checkScroll();
-            });
-
-            target.bind('detach.ScrollToFixed', function(ev) {
-                preventDefault(ev);
-
-                target.trigger('preUnfixed.ScrollToFixed');
-                setUnfixed();
-                target.trigger('unfixed.ScrollToFixed');
-
-                $(window).unbind('resize.ScrollToFixed', windowResize);
-                $(window).unbind('scroll.ScrollToFixed', windowScroll);
-
-                target.unbind('.ScrollToFixed');
-
-                //remove spacer from dom
-                spacer.remove();
-
-                base.$el.removeData('ScrollToFixed');
-            });
-
-            // Reset everything.
-            windowResize();
-        };
-
-        // Initialize the plugin.
-        base.init();
-    };
-
-    // Sets the option defaults.
-    $.ScrollToFixed.defaultOptions = {
-        marginTop : 0,
-        limit : 0,
-        bottom : -1,
-        zIndex : 1000,
-        baseClassName: 'scroll-to-fixed-fixed'
-    };
-
-    // Returns enhanced elements that will fix to the top of the page when the
-    // page is scrolled.
-    $.fn.scrollToFixed = function(options) {
-        return this.each(function() {
-            (new $.ScrollToFixed(this, options));
-        });
-    };
-})(jQuery);
+(function(a){a.isScrollToFixed=function(b){return !!a(b).data("ScrollToFixed")};a.ScrollToFixed=function(d,i){var m=this;m.$el=a(d);m.el=d;m.$el.data("ScrollToFixed",m);var c=false;var H=m.$el;var I;var F;var k;var e;var z;var E=0;var r=0;var j=-1;var f=-1;var u=null;var A;var g;function v(){H.trigger("preUnfixed.ScrollToFixed");l();H.trigger("unfixed.ScrollToFixed");f=-1;E=H.offset().top;r=H.offset().left;if(m.options.offsets){r+=(H.offset().left-H.position().left)}if(j==-1){j=r}I=H.css("position");c=true;if(m.options.bottom!=-1){H.trigger("preFixed.ScrollToFixed");x();H.trigger("fixed.ScrollToFixed")}}function o(){var J=m.options.limit;if(!J){return 0}if(typeof(J)==="function"){return J.apply(H)}return J}function q(){return I==="fixed"}function y(){return I==="absolute"}function h(){return !(q()||y())}function x(){if(!q()){var J=H[0].getBoundingClientRect();u.css({display:H.css("display"),width:J.width,height:J.height,"float":H.css("float")});cssOptions={"z-index":m.options.zIndex,position:"fixed",top:m.options.bottom==-1?t():"",bottom:m.options.bottom==-1?"":m.options.bottom,"margin-left":"0px"};if(!m.options.dontSetWidth){cssOptions.width=H.css("width")}H.css(cssOptions).removeClass('done');H.addClass(m.options.baseClassName);if(m.options.className){H.addClass(m.options.className)}I="fixed"}}function b(){var K=o();var J=r;if(m.options.removeOffsets){J="";K=K-E}cssOptions={position:"absolute",top:K,left:J,"margin-left":"0px",bottom:""};if(!m.options.dontSetWidth){cssOptions.width=H.css("width")}H.css(cssOptions).addClass('done');I="absolute"}function l(){if(!h()){f=-1;u.css("display","none");H.css({"z-index":z,width:"",position:F,left:"",top:e,"margin-left":""});H.removeClass("scroll-to-fixed-fixed");if(m.options.className){H.removeClass(m.options.className)}I=null}}function w(J){if(J!=f){H.css("left",r-J);f=J}}function t(){var J=m.options.marginTop;if(!J){return 0}if(typeof(J)==="function"){return J.apply(H)}return J}function B(){if(!a.isScrollToFixed(H)||H.is(":hidden")){return}var M=c;var L=h();if(!c){v()}else{if(h()){E=H.offset().top;r=H.offset().left}}var J=a(window).scrollLeft();var N=a(window).scrollTop();var K=o();if(m.options.minWidth&&a(window).width()<m.options.minWidth){if(!h()||!M){p();H.trigger("preUnfixed.ScrollToFixed");l();H.trigger("unfixed.ScrollToFixed")}}else{if(m.options.maxWidth&&a(window).width()>m.options.maxWidth){if(!h()||!M){p();H.trigger("preUnfixed.ScrollToFixed");l();H.trigger("unfixed.ScrollToFixed")}}else{if(m.options.bottom==-1){if(K>0&&N>=K-t()){if(!L&&(!y()||!M)){p();H.trigger("preAbsolute.ScrollToFixed");b();H.trigger("unfixed.ScrollToFixed")}}else{if(N>=E-t()){if(!q()||!M){p();H.trigger("preFixed.ScrollToFixed");x();f=-1;H.trigger("fixed.ScrollToFixed")}w(J)}else{if(!h()||!M){p();H.trigger("preUnfixed.ScrollToFixed");l();H.trigger("unfixed.ScrollToFixed")}}}}else{if(K>0){if(N+a(window).height()-H.outerHeight(true)>=K-(t()||-n())){if(q()){p();H.trigger("preUnfixed.ScrollToFixed");if(F==="absolute"){b()}else{l()}H.trigger("unfixed.ScrollToFixed")}}else{if(!q()){p();H.trigger("preFixed.ScrollToFixed");x()}w(J);H.trigger("fixed.ScrollToFixed")}}else{w(J)}}}}}function n(){if(!m.options.bottom){return 0}return m.options.bottom}function p(){var J=H.css("position");if(J=="absolute"){H.trigger("postAbsolute.ScrollToFixed")}else{if(J=="fixed"){H.trigger("postFixed.ScrollToFixed")}else{H.trigger("postUnfixed.ScrollToFixed")}}}var D=function(J){if(H.is(":visible")){c=false;B()}else{l()}};var G=function(J){(!!window.requestAnimationFrame)?requestAnimationFrame(B):B()};var C=function(){var K=document.body;if(document.createElement&&K&&K.appendChild&&K.removeChild){var M=document.createElement("div");if(!M.getBoundingClientRect){return null}M.innerHTML="x";M.style.cssText="position:fixed;top:100px;";K.appendChild(M);var N=K.style.height,O=K.scrollTop;K.style.height="3000px";K.scrollTop=500;var J=M.getBoundingClientRect().top;K.style.height=N;var L=(J===100);K.removeChild(M);K.scrollTop=O;return L}return null};var s=function(J){J=J||window.event;if(J.preventDefault){J.preventDefault()}J.returnValue=false};m.init=function(){m.options=a.extend({},a.ScrollToFixed.defaultOptions,i);z=H.css("z-index");m.$el.css("z-index",m.options.zIndex);u=a("<div />");I=H.css("position");F=H.css("position");k=H.css("float");e=H.css("top");if(h()){m.$el.after(u)}a(window).bind("resize.ScrollToFixed",D);a(window).bind("scroll.ScrollToFixed",G);if("ontouchmove" in window){a(window).bind("touchmove.ScrollToFixed",B)}if(m.options.preFixed){H.bind("preFixed.ScrollToFixed",m.options.preFixed)}if(m.options.postFixed){H.bind("postFixed.ScrollToFixed",m.options.postFixed)}if(m.options.preUnfixed){H.bind("preUnfixed.ScrollToFixed",m.options.preUnfixed)}if(m.options.postUnfixed){H.bind("postUnfixed.ScrollToFixed",m.options.postUnfixed)}if(m.options.preAbsolute){H.bind("preAbsolute.ScrollToFixed",m.options.preAbsolute)}if(m.options.postAbsolute){H.bind("postAbsolute.ScrollToFixed",m.options.postAbsolute)}if(m.options.fixed){H.bind("fixed.ScrollToFixed",m.options.fixed)}if(m.options.unfixed){H.bind("unfixed.ScrollToFixed",m.options.unfixed)}if(m.options.spacerClass){u.addClass(m.options.spacerClass)}H.bind("resize.ScrollToFixed",function(){u.height(H.height())});H.bind("scroll.ScrollToFixed",function(){H.trigger("preUnfixed.ScrollToFixed");l();H.trigger("unfixed.ScrollToFixed");B()});H.bind("detach.ScrollToFixed",function(J){s(J);H.trigger("preUnfixed.ScrollToFixed");l();H.trigger("unfixed.ScrollToFixed");a(window).unbind("resize.ScrollToFixed",D);a(window).unbind("scroll.ScrollToFixed",G);H.unbind(".ScrollToFixed");u.remove();m.$el.removeData("ScrollToFixed")});D()};m.init()};a.ScrollToFixed.defaultOptions={marginTop:0,limit:0,bottom:-1,zIndex:1000,baseClassName:"scroll-to-fixed-fixed"};a.fn.scrollToFixed=function(b){return this.each(function(){(new a.ScrollToFixed(this,b))})}})(jQuery);
 /*!
 	jQuery Waypoints
 	Copyright	Caleb Troughton
@@ -675,6 +114,15 @@ eval(function(p,a,c,k,e,r){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a
 	https://github.com/imakewebthings/waypoints
 */
 (function(){var t=[].indexOf||function(t){for(var e=0,n=this.length;e<n;e++){if(e in this&&this[e]===t)return e}return-1},e=[].slice;(function(t,e){if(typeof define==="function"&&define.amd){return define("waypoints",["jquery"],function(n){return e(n,t)})}else{return e(t.jQuery,t)}})(this,function(n,r){var i,o,l,s,f,u,a,c,h,d,p,y,v,w,g,m;i=n(r);c=t.call(r,"ontouchstart")>=0;s={horizontal:{},vertical:{}};f=1;a={};u="waypoints-context-id";p="resize.waypoints";y="scroll.waypoints";v=1;w="waypoints-waypoint-ids";g="waypoint";m="waypoints";o=function(){function t(t){var e=this;this.$element=t;this.element=t[0];this.didResize=false;this.didScroll=false;this.id="context"+f++;this.oldScroll={x:t.scrollLeft(),y:t.scrollTop()};this.waypoints={horizontal:{},vertical:{}};t.data(u,this.id);a[this.id]=this;t.bind(y,function(){var t;if(!(e.didScroll||c)){e.didScroll=true;t=function(){e.doScroll();return e.didScroll=false};return r.setTimeout(t,n[m].settings.scrollThrottle)}});t.bind(p,function(){var t;if(!e.didResize){e.didResize=true;t=function(){n[m]("refresh");return e.didResize=false};return r.setTimeout(t,n[m].settings.resizeThrottle)}})}t.prototype.doScroll=function(){var t,e=this;t={horizontal:{newScroll:this.$element.scrollLeft(),oldScroll:this.oldScroll.x,forward:"right",backward:"left"},vertical:{newScroll:this.$element.scrollTop(),oldScroll:this.oldScroll.y,forward:"down",backward:"up"}};if(c&&(!t.vertical.oldScroll||!t.vertical.newScroll)){n[m]("refresh")}n.each(t,function(t,r){var i,o,l;l=[];o=r.newScroll>r.oldScroll;i=o?r.forward:r.backward;n.each(e.waypoints[t],function(t,e){var n,i;if(r.oldScroll<(n=e.offset)&&n<=r.newScroll){return l.push(e)}else if(r.newScroll<(i=e.offset)&&i<=r.oldScroll){return l.push(e)}});l.sort(function(t,e){return t.offset-e.offset});if(!o){l.reverse()}return n.each(l,function(t,e){if(e.options.continuous||t===l.length-1){return e.trigger([i])}})});return this.oldScroll={x:t.horizontal.newScroll,y:t.vertical.newScroll}};t.prototype.refresh=function(){var t,e,r,i=this;r=n.isWindow(this.element);e=this.$element.offset();this.doScroll();t={horizontal:{contextOffset:r?0:e.left,contextScroll:r?0:this.oldScroll.x,contextDimension:this.$element.width(),oldScroll:this.oldScroll.x,forward:"right",backward:"left",offsetProp:"left"},vertical:{contextOffset:r?0:e.top,contextScroll:r?0:this.oldScroll.y,contextDimension:r?n[m]("viewportHeight"):this.$element.height(),oldScroll:this.oldScroll.y,forward:"down",backward:"up",offsetProp:"top"}};return n.each(t,function(t,e){return n.each(i.waypoints[t],function(t,r){var i,o,l,s,f;i=r.options.offset;l=r.offset;o=n.isWindow(r.element)?0:r.$element.offset()[e.offsetProp];if(n.isFunction(i)){i=i.apply(r.element)}else if(typeof i==="string"){i=parseFloat(i);if(r.options.offset.indexOf("%")>-1){i=Math.ceil(e.contextDimension*i/100)}}r.offset=o-e.contextOffset+e.contextScroll-i;if(r.options.onlyOnScroll&&l!=null||!r.enabled){return}if(l!==null&&l<(s=e.oldScroll)&&s<=r.offset){return r.trigger([e.backward])}else if(l!==null&&l>(f=e.oldScroll)&&f>=r.offset){return r.trigger([e.forward])}else if(l===null&&e.oldScroll>=r.offset){return r.trigger([e.forward])}})})};t.prototype.checkEmpty=function(){if(n.isEmptyObject(this.waypoints.horizontal)&&n.isEmptyObject(this.waypoints.vertical)){this.$element.unbind([p,y].join(" "));return delete a[this.id]}};return t}();l=function(){function t(t,e,r){var i,o;r=n.extend({},n.fn[g].defaults,r);if(r.offset==="bottom-in-view"){r.offset=function(){var t;t=n[m]("viewportHeight");if(!n.isWindow(e.element)){t=e.$element.height()}return t-n(this).outerHeight()}}this.$element=t;this.element=t[0];this.axis=r.horizontal?"horizontal":"vertical";this.callback=r.handler;this.context=e;this.enabled=r.enabled;this.id="waypoints"+v++;this.offset=null;this.options=r;e.waypoints[this.axis][this.id]=this;s[this.axis][this.id]=this;i=(o=t.data(w))!=null?o:[];i.push(this.id);t.data(w,i)}t.prototype.trigger=function(t){if(!this.enabled){return}if(this.callback!=null){this.callback.apply(this.element,t)}if(this.options.triggerOnce){return this.destroy()}};t.prototype.disable=function(){return this.enabled=false};t.prototype.enable=function(){this.context.refresh();return this.enabled=true};t.prototype.destroy=function(){delete s[this.axis][this.id];delete this.context.waypoints[this.axis][this.id];return this.context.checkEmpty()};t.getWaypointsByElement=function(t){var e,r;r=n(t).data(w);if(!r){return[]}e=n.extend({},s.horizontal,s.vertical);return n.map(r,function(t){return e[t]})};return t}();d={init:function(t,e){var r;if(e==null){e={}}if((r=e.handler)==null){e.handler=t}this.each(function(){var t,r,i,s;t=n(this);i=(s=e.context)!=null?s:n.fn[g].defaults.context;if(!n.isWindow(i)){i=t.closest(i)}i=n(i);r=a[i.data(u)];if(!r){r=new o(i)}return new l(t,r,e)});n[m]("refresh");return this},disable:function(){return d._invoke(this,"disable")},enable:function(){return d._invoke(this,"enable")},destroy:function(){return d._invoke(this,"destroy")},prev:function(t,e){return d._traverse.call(this,t,e,function(t,e,n){if(e>0){return t.push(n[e-1])}})},next:function(t,e){return d._traverse.call(this,t,e,function(t,e,n){if(e<n.length-1){return t.push(n[e+1])}})},_traverse:function(t,e,i){var o,l;if(t==null){t="vertical"}if(e==null){e=r}l=h.aggregate(e);o=[];this.each(function(){var e;e=n.inArray(this,l[t]);return i(o,e,l[t])});return this.pushStack(o)},_invoke:function(t,e){t.each(function(){var t;t=l.getWaypointsByElement(this);return n.each(t,function(t,n){n[e]();return true})});return this}};n.fn[g]=function(){var t,r;r=arguments[0],t=2<=arguments.length?e.call(arguments,1):[];if(d[r]){return d[r].apply(this,t)}else if(n.isFunction(r)){return d.init.apply(this,arguments)}else if(n.isPlainObject(r)){return d.init.apply(this,[null,r])}else if(!r){return n.error("jQuery Waypoints needs a callback function or handler option.")}else{return n.error("The "+r+" method does not exist in jQuery Waypoints.")}};n.fn[g].defaults={context:r,continuous:true,enabled:true,horizontal:false,offset:0,triggerOnce:false};h={refresh:function(){return n.each(a,function(t,e){return e.refresh()})},viewportHeight:function(){var t;return(t=r.innerHeight)!=null?t:i.height()},aggregate:function(t){var e,r,i;e=s;if(t){e=(i=a[n(t).data(u)])!=null?i.waypoints:void 0}if(!e){return[]}r={horizontal:[],vertical:[]};n.each(r,function(t,i){n.each(e[t],function(t,e){return i.push(e)});i.sort(function(t,e){return t.offset-e.offset});r[t]=n.map(i,function(t){return t.element});return r[t]=n.unique(r[t])});return r},above:function(t){if(t==null){t=r}return h._filter(t,"vertical",function(t,e){return e.offset<=t.oldScroll.y})},below:function(t){if(t==null){t=r}return h._filter(t,"vertical",function(t,e){return e.offset>t.oldScroll.y})},left:function(t){if(t==null){t=r}return h._filter(t,"horizontal",function(t,e){return e.offset<=t.oldScroll.x})},right:function(t){if(t==null){t=r}return h._filter(t,"horizontal",function(t,e){return e.offset>t.oldScroll.x})},enable:function(){return h._invoke("enable")},disable:function(){return h._invoke("disable")},destroy:function(){return h._invoke("destroy")},extendFn:function(t,e){return d[t]=e},_invoke:function(t){var e;e=n.extend({},s.vertical,s.horizontal);return n.each(e,function(e,n){n[t]();return true})},_filter:function(t,e,r){var i,o;i=a[n(t).data(u)];if(!i){return[]}o=[];n.each(i.waypoints[e],function(t,e){if(r(i,e)){return o.push(e)}});o.sort(function(t,e){return t.offset-e.offset});return n.map(o,function(t){return t.element})}};n[m]=function(){var t,n;n=arguments[0],t=2<=arguments.length?e.call(arguments,1):[];if(h[n]){return h[n].apply(null,t)}else{return h.aggregate.call(null,n)}};n[m].settings={resizeThrottle:100,scrollThrottle:30};return i.load(function(){return n[m]("refresh")})})}).call(this);
+/*!
+	jScrollPane
+	Copyright	Kelvin Luck
+	License		MIT
+	Version		2.0.22
+
+	https://github.com/vitch/jScrollPane
+*/
+eval(function(p,a,c,k,e,r){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--)r[e(c)]=k[c]||e(c);k=[function(e){return r[e]}];e=function(){return'\\w+'};c=1};while(c--)if(k[c])p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c]);return p}('!6(a){"6"==3i 2F&&2F.4k?2F(["3j"],a):"4l"==3i 3k?4m.3k=a(4n("3j")):a(4o)}(6(a){a.2f.2G=6(b){6 c(b,c){6 d(c){12 f,h,j,k,l,o,p=!1,q=!1;1b(N=c,1g 0===O)l=b.1j(),o=b.2g(),b.13({2H:"4p",3l:0}),P=b.2h()+1r,Q=b.3m(),b.1c(P),O=a(\'<17 14="3n" />\').13("3l",2i).1h(b.3o()),R=a(\'<17 14="4q" />\').13({1c:P+"1k",1W:Q+"1k"}).1h(O).4r(b);2I{1b(b.13("1c",""),p=N.3p&&A(),q=N.3q&&B(),k=b.2h()+1r!=P||b.1M()!=Q,k&&(P=b.2h()+1r,Q=b.3m(),R.13({1c:P+"1k",1W:Q+"1k"})),!k&&2J==S&&O.1M()==T)9 1g b.1c(P);2J=S,O.13("1c",""),b.1c(P),R.1d(">.1X,>.1Y").3r().4s()}O.13("2H","4t"),S=c.2K?c.2K:O[0].4u,T=O[0].4v,O.13("2H",""),U=S/P,V=T/Q,W=V>1,X=U>1,X||W?(b.1n("2j"),f=N.3s&&($||15),f&&(h=y(),j=z()),e(),g(),i(),f&&(w(q?S-P:h,!1),v(p?T-Q:j,!1)),F(),C(),L(),N.3t&&H(),N.3u&&m(),J(),N.2L&&K()):(b.1l("2j"),O.13({1e:0,1i:0,1c:R.1c()-1r}),D(),G(),I(),n()),N.2M&&!1A?1A=3v(6(){d(N)},N.3w):!N.2M&&1A&&2N(1A),l&&b.1j(0)&&v(l,!1),o&&b.2g(0)&&w(o,!1),b.1B("7-4w",[X||W])}6 e(){W&&(R.1h(a(\'<17 14="1X" />\').1h(a(\'<17 14="1C 4x" />\'),a(\'<17 14="2k" />\').1h(a(\'<17 14="2l" />\').1h(a(\'<17 14="4y" />\'),a(\'<17 14="4z" />\'))),a(\'<17 14="1C 4A" />\'))),1Z=R.1d(">.1X"),1o=1Z.1d(">.2k"),Y=1o.1d(">.2l"),N.21&&(1N=a(\'<a 14="1D 4B" />\').11("1p.7",k(0,-1)).11("1E.7",E),1O=a(\'<a 14="1D 4C" />\').11("1p.7",k(0,1)).11("1E.7",E),N.2O&&(1N.11("2m.7",k(0,-1,1N)),1O.11("2m.7",k(0,1,1O))),j(1o,N.3x,1N,1O)),1F=Q,R.1d(">.1X>.1C:2P,>.1X>.1D").22(6(){1F-=a(18).1M()}),Y.3y(6(){Y.1n("2n")},6(){Y.1l("2n")}).11("1p.7",6(b){a("1G").11("2Q.7 2R.7",E),Y.1n("1P");12 c=b.1H-Y.1m().1e;9 a("1G").11("2S.7",6(a){p(a.1H-c,!1)}).11("1y.7 2T.7",o),!1}),f())}6 f(){1o.1W(1F+"1k"),$=0,2o=N.3z+1o.1Q(),O.1c(P-2o-1r);2p{0===1Z.1m().1i&&O.13("4D-1i",2o+"1k")}2q(a){}}6 g(){X&&(R.1h(a(\'<17 14="1Y" />\').1h(a(\'<17 14="1C 4E" />\'),a(\'<17 14="2k" />\').1h(a(\'<17 14="2l" />\').1h(a(\'<17 14="4F" />\'),a(\'<17 14="4G" />\'))),a(\'<17 14="1C 4H" />\'))),23=R.1d(">.1Y"),1q=23.1d(">.2k"),1f=1q.1d(">.2l"),N.21&&(1R=a(\'<a 14="1D 4I" />\').11("1p.7",k(-1,0)).11("1E.7",E),1S=a(\'<a 14="1D 4J" />\').11("1p.7",k(1,0)).11("1E.7",E),N.2O&&(1R.11("2m.7",k(-1,0,1R)),1S.11("2m.7",k(1,0,1S))),j(1q,N.3A,1R,1S)),1f.3y(6(){1f.1n("2n")},6(){1f.1l("2n")}).11("1p.7",6(b){a("1G").11("2Q.7 2R.7",E),1f.1n("1P");12 c=b.1I-1f.1m().1i;9 a("1G").11("2S.7",6(a){r(a.1I-c,!1)}).11("1y.7 2T.7",o),!1}),1z=R.2h(),h())}6 h(){R.1d(">.1Y>.1C:2P,>.1Y>.1D").22(6(){1z-=a(18).1Q()}),1q.1c(1z+"1k"),15=0}6 i(){1b(X&&W){12 b=1q.1M(),c=1o.1Q();1F-=b,a(23).1d(">.1C:2P,>.1D").22(6(){1z+=a(18).1Q()}),1z-=c,Q-=c,P-=b,1q.4K().1h(a(\'<17 14="4L" />\').13("1c",b+"1k")),f(),h()}X&&O.1c(R.1Q()-1r+"1k"),T=O.1M(),V=T/Q,X&&(1s=1T.2r(1/U*1z),1s>N.2U?1s=N.2U:1s<N.2V&&(1s=N.2V),1f.1c(1s+"1k"),1t=1z-1s,s(15)),W&&(1u=1T.2r(1/V*1F),1u>N.2W?1u=N.2W:1u<N.2X&&(1u=N.2X),Y.1W(1u+"1k"),Z=1F-1u,q($))}6 j(a,b,c,d){12 e,f="4M",g="3B";"4N"==b&&(b=/4O/.3C(4P.4Q)?"3B":"2Y"),b==f?g=b:b==g&&(f=b,e=c,c=d,d=e),a[f](c)[g](d)}6 k(a,b,c){9 6(){9 l(a,b,18,c),18.4R(),!1}}6 l(b,c,d,e){d=a(d).1n("1P");12 f,g,h=!0,i=6(){0!==b&&16.1J(b*N.2s),0!==c&&16.1v(c*N.2s),g=2Z(i,h?N.2t:N.3D),h=!1};i(),f=e?"4S.7":"1y.7",e=e||a("1G"),e.11(f,6(){d.1l("1P"),g&&31(g),g=24,e.19(f)})}6 m(){n(),W&&1o.11("1p.7",6(b){1b(1g 0===b.2u||b.2u==b.3E){12 c,d=a(18),e=d.25(),f=b.1H-e.1e-$,g=!0,h=6(){12 a=d.25(),e=b.1H-a.1e-1u/2,j=Q*N.26,k=Z*j/(T-Q);1b(0>f)$-k>e?16.1v(-j):p(e);2I{1b(!(f>0))9 1g i();e>$+k?16.1v(j):p(e)}c=2Z(h,g?N.2t:N.3a),g=!1},i=6(){c&&31(c),c=24,a(1w).19("1y.7",i)};9 h(),a(1w).11("1y.7",i),!1}}),X&&1q.11("1p.7",6(b){1b(1g 0===b.2u||b.2u==b.3E){12 c,d=a(18),e=d.25(),f=b.1I-e.1i-15,g=!0,h=6(){12 a=d.25(),e=b.1I-a.1i-1s/2,j=P*N.26,k=1t*j/(S-P);1b(0>f)15-k>e?16.1J(-j):r(e);2I{1b(!(f>0))9 1g i();e>15+k?16.1J(j):r(e)}c=2Z(h,g?N.2t:N.3a),g=!1},i=6(){c&&31(c),c=24,a(1w).19("1y.7",i)};9 h(),a(1w).11("1y.7",i),!1}})}6 n(){1q&&1q.19("1p.7"),1o&&1o.19("1p.7")}6 o(){a("1G").19("2Q.7 2R.7 2S.7 1y.7 2T.7"),Y&&Y.1l("1P"),1f&&1f.1l("1P")}6 p(a,b){W&&(0>a?a=0:a>Z&&(a=Z),1g 0===b&&(b=N.3b),b?16.2v(Y,"1e",a,q):(Y.13("1e",a),q(a)))}6 q(a){1g 0===a&&(a=Y.1m().1e),R.1j(0),$=a||0;12 c=0===$,d=$==Z,e=a/Z,f=-e*(T-Q);(27!=c||28!=d)&&(27=c,28=d,b.1B("7-3F-3G",[27,28,29,2a])),t(c,d),O.13("1e",f),b.1B("7-2w-y",[-f,c,d]).1B("2w")}6 r(a,b){X&&(0>a?a=0:a>1t&&(a=1t),1g 0===b&&(b=N.3b),b?16.2v(1f,"1i",a,s):(1f.13("1i",a),s(a)))}6 s(a){1g 0===a&&(a=1f.1m().1i),R.1j(0),15=a||0;12 c=0===15,d=15==1t,e=a/1t,f=-e*(S-P);(29!=c||2a!=d)&&(29=c,2a=d,b.1B("7-3F-3G",[27,28,29,2a])),u(c,d),O.13("1i",f),b.1B("7-2w-x",[-f,c,d]).1B("2w")}6 t(a,b){N.21&&(1N[a?"1n":"1l"]("2x"),1O[b?"1n":"1l"]("2x"))}6 u(a,b){N.21&&(1R[a?"1n":"1l"]("2x"),1S[b?"1n":"1l"]("2x"))}6 v(a,b){12 c=a/(T-Q);p(c*Z,b)}6 w(a,b){12 c=a/(S-P);r(c*1t,b)}6 x(b,c,d){12 e,f,g,h,i,j,k,l,m,n=0,o=0;2p{e=a(b)}2q(p){9}4T(f=e.1M(),g=e.1Q(),R.1j(0),R.2g(0);!e.4U(".3n");)1b(n+=e.1m().1e,o+=e.1m().1i,e=e.4V(),/^2y|1G$/i.3C(e[0].4W))9;h=z(),j=h+Q,h>n||c?l=n-N.2b:n+f>j&&(l=n-Q+f+N.2b),3H(l)||v(l,d),i=y(),k=i+P,i>o||c?m=o-N.2b:o+g>k&&(m=o-P+g+N.2b),3H(m)||w(m,d)}6 y(){9-O.1m().1i}6 z(){9-O.1m().1e}6 A(){12 a=T-Q;9 a>20&&a-z()<10}6 B(){12 a=S-P;9 a>20&&a-y()<10}6 C(){R.19(2z).11(2z,6(a,b,c,d){15||(15=0),$||($=0);12 e=15,f=$,g=a.4X||N.3I;9 16.3J(c*g,-d*g,!1),e==15&&f==$})}6 D(){R.19(2z)}6 E(){9!1}6 F(){O.1d(":3K,a").19("2c.7").11("2c.7",6(a){x(a.3c,!1)})}6 G(){O.1d(":3K,a").19("2c.7")}6 H(){6 c(){12 a=15,b=$;3L(d){1a 40:16.1v(N.1U,!1);1K;1a 38:16.1v(-N.1U,!1);1K;1a 34:1a 32:16.1v(Q*N.26,!1);1K;1a 33:16.1v(-Q*N.26,!1);1K;1a 39:16.1J(N.1U,!1);1K;1a 37:16.1J(-N.1U,!1)}9 e=a!=15||b!=$}12 d,e,f=[];X&&f.3M(23[0]),W&&f.3M(1Z[0]),O.11("2c.7",6(){b.2c()}),b.2A("3d",0).19("3e.7 3f.7").11("3e.7",6(b){1b(b.3c===18||f.2d&&a(b.3c).3N(f).2d){12 g=15,h=$;3L(b.2B){1a 40:1a 38:1a 34:1a 32:1a 33:1a 39:1a 37:d=b.2B,c();1K;1a 35:v(T-Q),d=24;1K;1a 36:v(0),d=24}9 e=b.2B==d&&g!=15||h!=$,!e}}).11("3f.7",6(a){9 a.2B==d&&c(),!e}),N.1V?(b.13("3O","4Y"),"1V"3P R[0]&&b.2A("1V",!0)):(b.13("3O",""),"1V"3P R[0]&&b.2A("1V",!1))}6 I(){b.2A("3d","-1").4Z("3d").19("3e.7 3f.7"),O.19(".7")}6 J(){1b(1L.3g&&1L.3g.2d>1){12 b,c,d=3Q(1L.3g.2C(1));2p{b=a("#"+d+\', a[3R="\'+d+\'"]\')}2q(e){9}b.2d&&O.1d(d)&&(0===R.1j()?c=3v(6(){R.1j()>0&&(x(b,!0),a(1w).1j(R.1m().1e),2N(c))},50):(x(b,!0),a(1w).1j(R.1m().1e)))}}6 K(){a(1w.2y).2e("3S")||(a(1w.2y).2e("3S",!0),a(1w.2y).51("a[1x*=#]","1E",6(b){12 c,d,e,f,g,h,i=18.1x.2C(0,18.1x.2D("#")),j=1L.1x;1b(-1!==1L.1x.2D("#")&&(j=1L.1x.2C(0,1L.1x.2D("#"))),i===j){c=3Q(18.1x.2C(18.1x.2D("#")+1));2p{d=a("#"+c+\', a[3R="\'+c+\'"]\')}2q(k){9}d.2d&&(e=d.3N(".2j"),f=e.2e("7"),f.3T(d,!0),e[0].3U&&(g=a(3V).1j(),h=d.25().1e,(g>h||h>g+a(3V).1W())&&e[0].3U()),b.52())}}))}6 L(){12 a,b,c,d,e,f=!1;R.19("3W.7 3X.7 3Y.7 1E.7-3Z").11("3W.7",6(g){12 h=g.41.42[0];a=y(),b=z(),c=h.1I,d=h.1H,e=!1,f=!0}).11("3X.7",6(g){1b(f){12 h=g.41.42[0],i=15,j=$;9 16.43(a+c-h.1I,b+d-h.1H),e=e||1T.44(c-h.1I)>5||1T.44(d-h.1H)>5,i==15&&j==$}}).11("3Y.7",6(a){f=!1}).11("1E.7-3Z",6(a){9 e?(e=!1,!1):1g 0})}6 M(){12 a=z(),c=y();b.1l("2j").19(".7"),O.19(".7"),b.53(2E.1h(O.3o())),2E.1j(a),2E.2g(c),1A&&2N(1A)}12 N,O,P,Q,R,S,T,U,V,W,X,Y,Z,$,1f,1t,15,1Z,1o,2o,1F,1u,1N,1O,23,1q,1z,1s,1R,1S,1A,2i,1r,2J,16=18,27=!0,29=!0,28=!1,2a=!1,2E=b.54(!1,!1).55(),2z=a.2f.45?"45.7":"56.7";"57-46"===b.13("46-58")?(2i=0,1r=0):(2i=b.13("59")+" "+b.13("47")+" "+b.13("5a")+" "+b.13("48"),1r=(49(b.13("48"),10)||0)+(49(b.13("47"),10)||0)),a.3h(16,{4a:6(b){b=a.3h({},N,b),d(b)},3T:6(a,b,c){x(a,b,c)},43:6(a,b,c){w(a,c),v(b,c)},5b:6(a,b){w(a,b)},5c:6(a,b){v(a,b)},5d:6(a,b){w(a*(S-P),b)},5e:6(a,b){v(a*(T-Q),b)},3J:6(a,b,c){16.1J(a,c),16.1v(b,c)},1J:6(a,b){12 c=y()+1T[0>a?"4b":"2r"](a),d=c/(S-P);r(d*1t,b)},1v:6(a,b){12 c=z()+1T[0>a?"4b":"2r"](a),d=c/(T-Q);p(d*Z,b)},5f:6(a,b){r(a,b)},5g:6(a,b){p(a,b)},2v:6(a,b,c,d){12 e={};e[b]=c,a.2v(e,{5h:N.4c,5i:N.4d,5j:!1,5k:d})},5l:6(){9 y()},5m:6(){9 z()},5n:6(){9 S},5o:6(){9 T},5p:6(){9 y()/(S-P)},5q:6(){9 z()/(T-Q)},5r:6(){9 X},5s:6(){9 W},5t:6(){9 O},5u:6(a){p(Z,a)},2L:a.5v,5w:6(){M()}}),d(c)}9 b=a.3h({},a.2f.2G.4e,b),a.22(["2s","4f","1U"],6(){b[18]=b[18]||b.4g}),18.22(6(){12 d=a(18),e=d.2e("7");e?e.4a(b):(a("5x",d).5y(\'[4h="5z/5A"],:5B([4h])\').3r(),e=5C c(d,b),d.2e("7",e))})},a.2f.2G.4e={21:!1,3s:!0,3p:!1,3q:!1,3u:!0,2M:!1,3w:5D,2X:0,2W:4i,2V:0,2U:4i,2K:1g 0,3b:!1,4c:4j,4d:"5E",2L:!1,3z:4,2b:4,3I:3,2s:0,3D:50,2O:!1,4f:0,3a:5F,3x:"2Y",3A:"2Y",3t:!0,1V:!1,1U:0,2t:4j,4g:30,26:.8}});',62,352,'||||||function|jsp||return||||||||||||||||||||||||||||||||||||||||||||||||||||||bind|var|css|class|ba|ta|div|this|unbind|case|if|width|find|top|_|void|append|left|scrollTop|px|removeClass|position|addClass|da|mousedown|ka|ra|ma|aa|ga|scrollByY|document|href|mouseup|la|pa|trigger|jspCap|jspArrow|click|fa|html|pageY|pageX|scrollByX|break|location|outerHeight|ha|ia|jspActive|outerWidth|na|oa|Math|keyboardSpeed|hideFocus|height|jspVerticalBar|jspHorizontalBar|ca||showArrows|each|ja|null|offset|scrollPagePercent|ua|wa|va|xa|horizontalGutter|focus|length|data|fn|scrollLeft|innerWidth|qa|jspScrollable|jspTrack|jspDrag|mouseover|jspHover|ea|try|catch|ceil|arrowButtonSpeed|initialDelay|originalTarget|animate|scroll|jspDisabled|body|za|attr|keyCode|substr|indexOf|ya|define|jScrollPane|overflow|else|sa|contentWidth|hijackInternalLinks|autoReinitialise|clearInterval|arrowScrollOnHover|visible|dragstart|selectstart|mousemove|mouseleave|horizontalDragMaxWidth|horizontalDragMinWidth|verticalDragMaxHeight|verticalDragMinHeight|split|setTimeout||clearTimeout|||||||||trackClickRepeatFreq|animateScroll|target|tabindex|keydown|keypress|hash|extend|typeof|jquery|exports|padding|innerHeight|jspPane|children|stickToBottom|stickToRight|remove|maintainPosition|enableKeyboardNavigation|clickOnTrack|setInterval|autoReinitialiseDelay|verticalArrowPositions|hover|verticalGutter|horizontalArrowPositions|after|test|arrowRepeatFreq|currentTarget|arrow|change|isNaN|mouseWheelSpeed|scrollBy|input|switch|push|closest|outline|in|escape|name|jspHijack|scrollToElement|scrollIntoView|window|touchstart|touchmove|touchend|touchclick||originalEvent|touches|scrollTo|abs|mwheelIntent|box|paddingRight|paddingLeft|parseInt|reinitialise|floor|animateDuration|animateEase|defaults|trackClickSpeed|speed|type|99999|300|amd|object|module|require|jQuery|hidden|jspContainer|appendTo|end|auto|scrollWidth|scrollHeight|initialised|jspCapTop|jspDragTop|jspDragBottom|jspCapBottom|jspArrowUp|jspArrowDown|margin|jspCapLeft|jspDragLeft|jspDragRight|jspCapRight|jspArrowLeft|jspArrowRight|parent|jspCorner|before|os|Mac|navigator|platform|blur|mouseout|for|is|offsetParent|nodeName|deltaFactor|none|removeAttr||delegate|preventDefault|replaceWith|clone|empty|mousewheel|border|sizing|paddingTop|paddingBottom|scrollToX|scrollToY|scrollToPercentX|scrollToPercentY|positionDragX|positionDragY|duration|easing|queue|step|getContentPositionX|getContentPositionY|getContentWidth|getContentHeight|getPercentScrolledX|getPercentScrolledY|getIsScrollableH|getIsScrollableV|getContentPane|scrollToBottom|noop|destroy|script|filter|text|javascript|not|new|500|linear|70'.split('|'),0,{}));
 /*!
  * Scripts
  */
@@ -691,6 +139,8 @@ head.ready(function() {
 					e.preventDefault();
 					window.open($(this).attr('href'));						  
 				});
+				$('a:not([href^="#"],[rel="external"],[href$="jpg"],[href$="gif"],[href$="png"],[href$="JPG"],[href$="GIF"],[href$="PNG"])').addClass('internal');
+				$('a.internal').on('click',function(){ $('html').addClass('clicked'); });
 			},
 			mails : function(){
 				$('.email:not(:input, div)').each(function(index){
@@ -736,7 +186,7 @@ head.ready(function() {
 			},
 			heights : function(){
 				$('.list-c').each(function(){ $(this).find('.title').matchHeight(); });
-				$('.slider-a article, #featured article').css('height',$(window).height());
+				$('.slider-a article, #featured article, #case-study').css('height',$(window).height());
 				//$('#cta > header, #cta > div').each(function(){ if($(this).outerHeight()<$(window).height()){ $(this).wrapInner('<div class="inner"></div>').addClass('absolute').css('min-height',$(window).height()); } });
 			},
 			responsive : function(){
@@ -756,7 +206,7 @@ head.ready(function() {
 				if($.browser.mobile){
 						
 				} else {
-					$('a[href^="#"]').on('click',function(e){ 
+					$('a[href^="#"]:not(.inside-slider-a)').on('click',function(e){ 
 						$('html, body').animate({'scrollTop': $($(this).attr('href')).offset().top}); 
 						e.preventDefault(); 
 					});					
@@ -774,13 +224,6 @@ head.ready(function() {
 				$('[class*="accordion"] > :header').on('click',function(){ $(this).toggleClass('toggle').next().slideToggle(); });
 			},
 			sliders : function(){
-				/*$('.slider-a > .inner').each(function(){ 
-					var slider = $(this).bxSlider({ pager: true, controls: true, useCSS: false, mode: 'fade' });
-					$(this).on('mousewheel',function(event, delta, deltaX, deltaY) {
-						if (delta > 0){ if(!$(this).find('[aria-hidden="false"]').is(':first-child')){ slider.goToPrevSlide(); event.stopPropagation(); event.preventDefault();	}}
-						if (deltaY < 0){ if(!$(this).find('[aria-hidden="false"]').is(':last-child')){ slider.goToNextSlide(); event.stopPropagation(); event.preventDefault(); }}					
-					});
-				});*/
 				$('.slider-a').append('<div class="pager" style="height:'+$(window).height()+'px;"><ul></ul></div>');				
 				$('.slider-a').each(function(){ 
 					to=1; $(this).find('article').each(function(){ 
@@ -789,7 +232,7 @@ head.ready(function() {
 					});
 				});
 				$('.slider-a .pager li:first-child a').addClass('active');
-				$('.slider-a .pager a').on('click',function(){
+				$('.slider-a .pager a').addClass('inside-slider-a').on('click',function(){
 					$(this).parents('.slider-a').find('.pager').find('a.active').removeClass('active');
 					$(this).addClass('active');
 				});
@@ -805,6 +248,11 @@ head.ready(function() {
 						$(this).parents('.slider-a').find('.pager').find('a[href=#'+$(this).attr('id')+']').addClass('active');					
 					}, { offset: '-49%' }); 
 				});
+				$('.slider-a').each(function(){ 
+					$(this).waypoint(function() { 
+						$(this).toggleClass('scrolled');
+					}, { offset: 0 }); 
+				});
 				$('#featured > .inner').each(function(){ 
 					$(this).bxSlider({ 
 						pager: true, controls: true, useCSS: false, mode: 'fade', auto: true, pause: 5000, infiniteLoop: true, onSlideAfter:function(currentSlideNumber,totalSlideQty,currentSlideHtmlObject){ 
@@ -813,6 +261,14 @@ head.ready(function() {
 						onSliderLoad : function(currentIndex){ $('#featured article:first-child').addClass('slider-active'); }
 					}); 
 				});
+			},
+			sticky : function(){
+				$('#sticky').addClass('scrolled').scrollToFixed();
+				$('#sticky.scrolled .inner').wrapInner('<div class="inset"></div>');
+				$('#sticky.scrolled ul > .inner .inset').each(function(){ $(this).css('width',$(this).outerWidth()); });
+				//if(!$.browser.mobile){
+					$('#sticky.scrolled > ul:not(.a) > .inner').jScrollPane({ showArrows: true });
+				//}
 			},
 			scrolling : function(){		
 				if(!$.browser.mobile){
@@ -842,15 +298,19 @@ head.ready(function() {
 					$('.no-mobile .list-b li:first-child > .fit').each(function(){ $(this).removeAttr('style').css('right',-$(this).outerWidth()); });
 				});
 			},
+			wraps : function(){
+				$('.module-a > div, .list-b > li, .slider-a, #featured, #sticky ul:not(.a)').wrapInner('<div class="inner"></div>');
+			},
 			miscellaneous : function(){
-				$('.module-a > div, .list-b > li, .slider-a, #featured').wrapInner('<div class="inner"></div>');
 				$('.list-b > li > .inner').wrapInner('<div class="inset"></div>');
-				$('.list-b > li').append('<div class="fit"></div>');
+				$('.list-b > li, .list-f li:not(.title)').append('<div class="fit"></div>');
+				$('.list-f .fit').append('<div class="inset"></div>');
 				$('.module-a > figure, #cta figure, #featured figure').each(function(){ $(this).css({'background-image':'url("'+$(this).find('img').attr('src')+'")'}); });
 				$('.module-a > div > .inner').each(function(){ if($(this).outerHeight()<660){ $(this).addClass('absolute'); } });
 				$('[class*="accordion"]').each(function(){ tn=1; $(this).children(':header').each(function(){ $(this).prepend('<span class="no">'+tn+'</span> '); tn++; });});
-				$('.list-d li.link a').each(function(){ $(this).css('height',$(this).parents('.list-d').find('img:first').outerHeight()); });
 				$('#featured').parents('html').addClass('has-featured');
+				$('.list-f .inset').each(function(){ $(this).css('width',parseFloat($(this).parents('li').text())/parseFloat($(this).parents('li').attr('data-max'))*100+'%'); });
+				$('.list-e li').on('click',function(){ $(this).toggleClass('toggle'); return false });
 			}
 		},
 		ie : {
@@ -865,6 +325,7 @@ head.ready(function() {
 
 	};
 
+	Default.utils.wraps();
 	Default.utils.links();
 	Default.utils.mails();
 	Default.utils.forms();
@@ -875,6 +336,7 @@ head.ready(function() {
 	Default.utils.scrolling();
 	Default.utils.resize();
 	Default.utils.accordion();
+	Default.utils.sticky();
 	Default.utils.top();
 	Default.utils.responsive();
 	Default.utils.loaded();
