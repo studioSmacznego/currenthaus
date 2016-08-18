@@ -91,6 +91,7 @@ article, aside, details, div, figcaption, figure, footer, header, hgroup, main, 
 			#sticky ul > .inner .inset { font-size: 0; white-space: nowrap; }
 			#sticky.scrolled ul > .inner { overflow: auto; position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
 			#sticky.scrolled ul > .inner .inset li { display: inline-block; float: none; }
+			.ie #sticky.scrolled ul > .inner { overflow: visible; }
 			#sticky.scrolled ul { right: 20px; width: auto; }
 			#sticky li { position: relative; float: left; margin: 0; padding: 0 25px 0 0; font-size: 12px; text-align: left; }
 				#sticky li:last-child { padding-right: 0; }
@@ -118,7 +119,7 @@ article, aside, details, div, figcaption, figure, footer, header, hgroup, main, 
 				#sticky ul.a li:first-child a:hover, #sticky ul.a li a:hover { background: #98dbe6; }
 		#sticky + div + #content, #sticky + #content { padding-top: 50px; }
 		#featured + #sticky { margin-top: -100px; }
-		#sticky.scroll-to-fixed-fixed { height: 50px; }
+		#sticky.scroll-to-fixed-fixed { left: 50% !important; height: 50px; margin: 0 0 0 -583px !important; }
 		.top-active #sticky.scroll-to-fixed-fixed, .to-bottom #sticky.scroll-to-fixed-fixed { -moz-transform: translateY(100px); -webkit-transform: translateY(100px); -o-transform: translateY(100px); -ms-transform: translateY(100px); transform: translateY(100px); }
 	#content { position: relative; z-index: 2; width: 760px; margin: 0 auto; padding: 100px 0 50px; }
 	#content:after, #footer:after, #top:after, #nav:after, .module-a:after, .list-c:after, .slider-a article > *:after, .accordion-a > div:after, #social:after, #social ul:after, #sticky:after, .module-c > header:after, .module-c > div:after, #sticky ul > .inner:after, #sticky .inset:after { content: ""; display: block; overflow: hidden; clear: both; height: 0; }
@@ -678,7 +679,7 @@ svg:not(:root) { overflow: hidden; }
 #content.a > *, #cta > header, #cta > div { width: 960px; }
 #cta > header, #cta > div { margin-left: -480px; }
 
-#sticky { left: 0; right: 0; width: 100%; margin: 0; }
+#sticky, #sticky.scroll-to-fixed-fixed { left: 0 !important; right: 0; width: 100%; margin: 0 !important; }
 	#sticky .bx-next { right: 0; }
 #social { }
 	#social .social-a { left: auto; right: 0; width: auto; }
