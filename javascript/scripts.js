@@ -167,6 +167,14 @@ head.ready(function() {
 				$('[required]').each(function(){ $(this).parent().addClass('is-required'); });
 				$('textarea').textareaAutoSize().parent().addClass('has-textarea');
 				
+				$('.form-a').on('keyup blur focus click',function(){
+					if($('#faa').val().length > 1 && $('#fab').val().length > 2 && $('#fad').val().length > 1) $(this).not('.filled').addClass('filled');
+					else $(this).removeClass('filled');
+					setTimeout(function(){
+						if($('.form-a em.error').is(':visible')) $('.form-a').removeClass('filled');
+					},50);
+				});
+
 				$('.form-a').validate({
 					highlight: function(element) { $(element).parent().addClass('error-info').parents('form').addClass('has-errors'); },
 					unhighlight: function(element) { $(element).parent().removeClass('error-info').parents('form').removeClass('has-errors'); },
@@ -175,26 +183,8 @@ head.ready(function() {
 						fac: {
 							phoneUS: true
 						}
-					}
+					},
 				});
-				$('.form-a').on('keyup',function(e){
-					if(!$(this).valid()) $(this).removeClass('filled');
-					else $(this).not('filled').addClass('filled');
-				});
-				/*$('.form-a :input:not(button)').bind('focus blur click keyup', function(){
-					if($(this).parents('form').valid()){
-						$(this).parents('form').addClass('filled');
-					} else { 
-						$(this).parents('form').removeClass('filled');
-					}
-				});*/
-				/*$('.form-a input').on('focus blur click keyup',function() {
-					if ($(this).parents('form').find(':input:not(button,[required])').filter(function() { return $(this).val() == ""; }).length) {
-						$(this).parents('form').removeClass('filled');
-					} else {
-						$(this).parents('form').addClass('filled');
-					}
-				});*/
 			},
 			date : function(){
 				$('#footer .date').text((new Date).getFullYear());
