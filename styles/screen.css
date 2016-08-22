@@ -21,6 +21,7 @@ article, aside, details, div, figcaption, figure, footer, header, hgroup, main, 
 /*! Layout --------- */
 #root { overflow: hidden; position: relative; width: 100%; padding: 100px 0 0; background: #fff; }
 	#intro { overflow: hidden; position: relative; width: 100%; }
+	.webkit #top * { transform: translateZ(0); }
 	#top { position: fixed; left: 0; right: 0; top: 0; z-index: 1001; height: 100px; border-bottom: 1px solid rgba(0,0,0,0); }
 	#top:after { content: ""; display: block; overflow: hidden; clear: both; height: 0; }
 		#logo { height: 100px; margin: 0 auto; padding: 0 0 0 5%; font-size: 1.3em; font-weight: 400; line-height: 100px; }
@@ -38,7 +39,7 @@ article, aside, details, div, figcaption, figure, footer, header, hgroup, main, 
 			#nav em { position: absolute; left: -3000em; top: -3000em; }
 		#top > .menu { display: block; position: absolute; right: 5%; top: -3000em; z-index: 9; width: 70px; height: 100px; color: #383838; font-weight: 400; font-size: 20px; cursor: pointer; }
 			#top > .menu:before { content: "\e907"; display: block; position: absolute; left: 0; top: 50%; width: 100%; margin: -20px 0 0; font-family: i; line-height: 40px; text-align: right; letter-spacing: normal; }
-	.domloaded #top { background: #fff; }
+	.domloaded #top, .solid #top, .to-top.solid #top { background: #fff; }
 	.domloaded #top { -moz-transform: translateY(-100%); -webkit-transform: translateY(-100%); -o-transform: translateY(-100%); -ms-transform: translateY(-100%); transform: translateY(-100%); }
 	.to-top #top, .to-bottom #top, .top-active #top { -moz-transform: none; -webkit-transform: none; -o-transform: none; -ms-transform: none; transform: none; }
 		.to-bottom #top, .top-active #top, .home.to-bottom #top, .home.top-active #top { border-bottom-color: #ddd; background: #fff; }
@@ -66,7 +67,7 @@ article, aside, details, div, figcaption, figure, footer, header, hgroup, main, 
 			#root #featured p { -moz-transition-delay: 1s; -webkit-transition-delay: 1s; -o-transition-delay: 1s; -ms-transition-delay: 1s; transition-delay: 1s; }
 			#featured h1 span:first-child, #featured h2 span:first-child, #featured h3 span:first-child, #featured h4 span:first-child, #featured h5 span:first-child, #featured h6 span:first-child { -moz-transition-delay: .5s; -webkit-transition-delay: .5s; -o-transition-delay: .5s; -ms-transition-delay: .5s; transition-delay: .5s; }
 		#root #featured figure, #root #featured:before { -moz-transition-property: all; -webkit-transition-property: all; -o-transition-property: all; -ms-transition-property: all; transition-property: all; }
-			#root .home #top > * { -moz-transition-duration: .5s; -webkit-transition-duration: .5s; -o-transition-duration: .5s; -ms-transition-duration: .5s; transition-duration: .5s; }
+			.home #root #top > * { -moz-transition-duration: .5s; -webkit-transition-duration: .5s; -o-transition-duration: .5s; -ms-transition-duration: .5s; transition-duration: .5s; }
 			#root #featured figure { -moz-transition-duration: 1s; -webkit-transition-duration: 1s; -o-transition-duration: 1s; -ms-transition-duration: 1s; transition-duration: 1s; }
 		#root #featured .slider-active *, #root #top.fixed, .home #root #top.show.reg, #featured.show:before, .home #root #top.show.reg > * { opacity: 1; }
 		#root #featured .slider-active header *, #featured.show:before { -moz-transform: none; -webkit-transform: none; -o-transform: none; -ms-transform: none; transform: none; }
