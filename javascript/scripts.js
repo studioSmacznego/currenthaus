@@ -178,12 +178,7 @@ head.ready(function() {
 				$('.form-a').validate({
 					highlight: function(element) { $(element).parent().addClass('error-info').parents('form').addClass('has-errors'); },
 					unhighlight: function(element) { $(element).parent().removeClass('error-info').parents('form').removeClass('has-errors'); },
-					errorElement: 'em',
-					rules : {
-						fac: {
-							phoneUS: true
-						}
-					},
+					errorElement: 'em'
 				});
 			},
 			date : function(){
