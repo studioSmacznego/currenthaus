@@ -271,7 +271,7 @@ head.ready(function() {
 				//}
 			},
 			scrolling : function(){		
-				if(!$.browser.mobile){
+				//if(!$.browser.mobile){
 					$(window).on('load scroll',function(){
 						var lastScrollTop = 0;
 						if($(window).scrollTop() + $(window).height() == $(document).height()){ $('html').addClass('to-bottom'); } else { $('html').removeClass('to-bottom'); }
@@ -288,7 +288,7 @@ head.ready(function() {
 							});
 						}
 					});
-				}
+				//}
 				$('#content :header, #content p, #content li, #content figure, #cta :header, #cta p, #cta li').addClass('not-visible').each(function(){ 
 					$(this).waypoint(function() { 
 						$(this).removeClass('not-visible');
