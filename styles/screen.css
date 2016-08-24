@@ -23,6 +23,7 @@ article, aside, details, div, figcaption, figure, footer, header, hgroup, main, 
 	#intro { overflow: hidden; position: relative; width: 100%; }
 	.webkit #top * { transform: translateZ(0); }
 	#top { position: fixed; left: 0; right: 0; top: 0; z-index: 1001; height: 100px; border-bottom: 1px solid rgba(0,0,0,0); }
+	#top { -moz-transform: translateY(-100%); -webkit-transform: translateY(-100%); -o-transform: translateY(-100%); -ms-transform: translateY(-100%); transform: translateY(-100%); }
 	#top:after { content: ""; display: block; overflow: hidden; clear: both; height: 0; }
 		#logo { height: 100px; margin: 0 auto; padding: 0 0 0 5%; font-size: 1.3em; font-weight: 400; line-height: 100px; }
 			#logo a { display: block; position: relative; width: 120px; height: 100%; color: #383838; text-decoration: none; text-align: left; text-indent: -3000em; }
@@ -40,7 +41,6 @@ article, aside, details, div, figcaption, figure, footer, header, hgroup, main, 
 		#top > .menu { display: block; position: absolute; right: 5%; top: -3000em; z-index: 9; width: 70px; height: 100px; color: #383838; font-weight: 400; font-size: 20px; cursor: pointer; }
 			#top > .menu:before { content: "\e907"; display: block; position: absolute; left: 0; top: 50%; width: 100%; margin: -20px 0 0; font-family: i; line-height: 40px; text-align: right; letter-spacing: normal; }
 	.domloaded #top, .solid #top, .to-top.solid #top { background: #fff; }
-	.domloaded #top { -moz-transform: translateY(-100%); -webkit-transform: translateY(-100%); -o-transform: translateY(-100%); -ms-transform: translateY(-100%); transform: translateY(-100%); }
 	.to-top #top, .to-bottom #top, .top-active #top { -moz-transform: none; -webkit-transform: none; -o-transform: none; -ms-transform: none; transform: none; }
 		.to-bottom #top, .top-active #top, .home.to-bottom #top, .home.top-active #top { border-bottom-color: #ddd; background: #fff; }
 		.to-top #top, .home #top, .home.to-top #top { border-bottom-color: rgba(0,0,0,0); background: none; }
@@ -174,9 +174,9 @@ article, aside, details, div, figcaption, figure, footer, header, hgroup, main, 
 			#footer .social-a:after { content: "\e906"; display: block; margin: 50px 0 0; font-family: i; font-size: 16px; line-height: 16px; letter-spacing: normal; }
 			#footer .social-a a { background: #fff; color: #383838; }
 				#footer .social-a a:hover, #social .social-a li a:hover { background: #FF5252; color: #fff; }
-	#root, #intro { -moz-transform: translateX(100%); -webkit-transform: translateX(100%); -o-transform: translateX(100%); -ms-transform: translateX(100%); transform: translateX(100%); }
+	/*#root, #intro { -moz-transform: translateX(100%); -webkit-transform: translateX(100%); -o-transform: translateX(100%); -ms-transform: translateX(100%); transform: translateX(100%); }
 		.domloaded #root, .domloaded #intro, .mobile #root, .mobile #intro, .ios #root, .ios #intro { -moz-transform: none; -webkit-transform: none; -o-transform: none; -ms-transform: none; transform: none; }
-		.clicked #root, .clicked #intro { -moz-transform: translateX(-100%); -webkit-transform: translateX(-100%); -o-transform: translateX(-100%); -ms-transform: translateX(-100%); transform: translateX(-100%); }
+		.clicked #root, .clicked #intro { -moz-transform: translateX(-100%); -webkit-transform: translateX(-100%); -o-transform: translateX(-100%); -ms-transform: translateX(-100%); transform: translateX(-100%); }*/
 
 
 /*! Columns --------- */
