@@ -175,7 +175,7 @@ article, aside, details, div, figcaption, figure, footer, header, hgroup, main, 
 			#footer .social-a a { background: #fff; color: #383838; }
 				#footer .social-a a:hover, #social .social-a li a:hover { background: #FF5252; color: #fff; }
 	#root, #intro { -moz-transform: translateX(100%); -webkit-transform: translateX(100%); -o-transform: translateX(100%); -ms-transform: translateX(100%); transform: translateX(100%); }
-		.domloaded #root, .domloaded #intro, .mobile #root, .mobile #intro { -moz-transform: none; -webkit-transform: none; -o-transform: none; -ms-transform: none; transform: none; }
+		.domloaded #root, .domloaded #intro, .mobile #root, .mobile #intro, .ios #root, .ios #intro { -moz-transform: none; -webkit-transform: none; -o-transform: none; -ms-transform: none; transform: none; }
 		.clicked #root, .clicked #intro { -moz-transform: translateX(-100%); -webkit-transform: translateX(-100%); -o-transform: translateX(-100%); -ms-transform: translateX(-100%); transform: translateX(-100%); }
 
 
@@ -204,7 +204,7 @@ article, aside, details, div, figcaption, figure, footer, header, hgroup, main, 
 		.loading > * > .b { animation: animateDot2 1.5s linear infinite; animation-delay: 0.5s; left: 24px; }
 		.loading > * > .c { animation: animateDot3 1.5s linear infinite; left: 12px; }
 		.loading > * > .d { animation: animateDot4 1.5s linear infinite; animation-delay: 0.5s; left: 24px; }
-	.mobile .loading, .domloaded .loading { visibility: hidden; opacity: 0; }
+	.mobile .loading, .domloaded .loading, .ios .loading { visibility: hidden; opacity: 0; }
 	.clicked .loading { visibility: visible; opacity: 1; }
 	
 
