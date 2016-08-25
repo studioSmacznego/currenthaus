@@ -188,14 +188,14 @@ head.ready(function() {
 						e.preventDefault(); 
 					});					
 				} else {
-					$('#root').swipe({
+					/*$('#root').swipe({
 						swipeUp: function(event, direction, distance, duration, fingerCount, fingerData) {
 							$('html').addClass('top-active');
 						},
 						swipeDown: function(event, direction, distance, duration, fingerCount, fingerData) {
 							$('html').removeClass('top-active');
 						}
-					});	
+					});*/
 				};
 			},
 			top : function(){
@@ -276,9 +276,9 @@ head.ready(function() {
 							$(window).on('touchmove',function(e){
 								var currentY = e.originalEvent.touches[0].clientY;
 								if(currentY > lastY){
-									$('html').removeClass('top-active');
-								} else if(currentY < lastY){
 									$('html').addClass('top-active');
+								} else if(currentY < lastY){
+									$('html').removeClass('top-active');
 								}
 								lastY = currentY;
 							});
