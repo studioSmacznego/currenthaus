@@ -188,7 +188,7 @@ head.ready(function() {
 						e.preventDefault(); 
 					});					
 				} else {
-					$(window).swipe({
+					$('#root').swipe({
 						swipeUp: function(event, direction, distance, duration, fingerCount, fingerData) {
 							$('html').addClass('top-active');
 						},
@@ -258,11 +258,12 @@ head.ready(function() {
 			},
 			scrolling : function(){		
 				//if(!$.browser.mobile){
-					$(window).on('load scroll',function(){
+					$(window).on('load scroll touchmove',function(){
 						var lastScrollTop = 0;
 						if($(window).scrollTop() + $(window).height() == $(document).height()){ $('html').addClass('to-bottom'); } else { $('html').removeClass('to-bottom'); }
 						if($(window).scrollTop() <= 0){ $('html').addClass('to-top'); }
 						if($(window).scrollTop() >= 200){
+							var lastY;
 							$('html').removeClass('to-top');
 							$(window).on('DOMMouseScroll',function(e){
 								if(e.originalEvent.detail > 0) { $('html').removeClass('top-active'); } 
@@ -271,6 +272,15 @@ head.ready(function() {
 							$(window).on('mousewheel',function(event){
 								if(event.originalEvent.wheelDelta < 0) { $('html:not(.ie)').removeClass('top-active'); } 
 								else { $('html:not(.ie)').addClass('top-active'); }
+							});
+							$(window).on('touchmove',function(e){
+								var currentY = e.originalEvent.touches[0].clientY;
+								if(currentY > lastY){
+									$('html').removeClass('top-active');
+								} else if(currentY < lastY){
+									$('html').addClass('top-active');
+								}
+								lastY = currentY;
 							});
 						}
 					});
