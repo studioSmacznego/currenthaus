@@ -43,7 +43,7 @@ article, aside, details, div, figcaption, figure, footer, header, hgroup, main, 
 	.domloaded #top, .solid #top, .to-top.solid #top { background: #fff; }
 	.to-top #top, .to-bottom #top, .top-active #top { -moz-transform: none; -webkit-transform: none; -o-transform: none; -ms-transform: none; transform: none; }
 		.to-bottom #top, .top-active #top, .home.to-bottom #top, .home.top-active #top, .mobile #root #top { border-bottom-color: #ddd; background: #fff; }
-		.to-top #top, .home #top, .home.to-top #top { border-bottom-color: rgba(0,0,0,0); background: none; }
+		.to-top #top, .home #top, .home.to-top #top, .mobile.home.to-top #root #top { border-bottom-color: rgba(0,0,0,0); background: none; }
 		.has-sticky #top { height: 99px; border-bottom-width: 0; }
 	#top.fixed { position: fixed; top: -3000em; border-bottom: 1px solid #ddd; background: #fff; opacity: 1; }
 	/*#top.fixed, .to-top #root #top.fixed, .to-top #intro #top.fixed { -moz-transform: translateY(-100%); -webkit-transform: translateY(-100%); -o-transform: translateY(-100%); -ms-transform: translateY(-100%); transform: translateY(-100%); }
