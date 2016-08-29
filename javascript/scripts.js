@@ -44,6 +44,23 @@ eval(function(p,a,c,k,e,r){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a
 */
 eval(function(p,a,c,k,e,r){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--)r[e(c)]=k[c]||e(c);k=[function(e){return r[e]}];e=function(){return'\\w+'};c=1};while(c--)if(k[c])p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c]);return p}('!2(a){"2"==T v&&v.U?v(["V"],a):a(F)}(2(a){2 b(b){4 c={},d=/^F\\d+$/;n a.t(b.W,2(a,b){b.X&&!d.Y(b.w)&&(c[b.w]=b.3)}),c}2 c(b,c){4 d=7,f=a(d);o(d.3==f.p("1")&&f.x(m.6))o(f.5("1-q")){o(f=f.G().Z(\'8[r="q"]:H\').I().p("9",f.y("9").5("1-9")),b===!0)n f[0].3=c;f.z()}A d.3="",f.J(m.6),d==e()&&d.11()}2 d(){4 d,e=7,f=a(e),g=7.9;o(""===e.3){o("q"===e.r){o(!f.5("1-K")){L{d=f.12().p({r:"B"})}M(h){d=a("<8>").p(a.N(b(7),{r:"B"}))}d.y("w").5({"1-q":f,"1-9":g}).C("z.1",c),f.5({"1-K":d,"1-9":g}).13(d)}f=f.y("9").G().14(\'8[r="B"]:H\').p("9",g).I()}f.15(m.6),f[0].3=f.p("1")}A f.J(m.6)}2 e(){L{n u.16}M(a){}}4 f,g,h="[17 18]"==19.1a.1b.D(O.1c),i="1"P u.Q("8")&&!h,j="1"P u.Q("s")&&!h,k=a.1d,l=a.1e;o(i&&j)g=a.R.1=2(){n 7},g.8=g.s=!0;A{4 m={};g=a.R.1=2(b){4 e={6:"1"};m=a.N({},e,b);4 f=7;n f.1f((i?"s":":8")+"[1]").1g("."+m.6).C({"z.1":c,"S.1":d}).5("1-E",!0).1h("S.1"),f},g.8=i,g.s=j,f={1i:2(b){4 c=a(b),d=c.5("1-q");n d?d[0].3:c.5("1-E")&&c.x("1")?"":b.3},1j:2(b,f){4 g=a(b),h=g.5("1-q");n h?h[0].3=f:g.5("1-E")?(""===f?(b.3=f,b!=e()&&d.D(b)):g.x(m.6)?c.D(b,!0,f)||(b.3=f):b.3=f,g):b.3=f}},i||(k.8=f,l.3=f),j||(k.s=f,l.3=f),a(2(){a(u).1k("1l","1m.1",2(){4 b=a("."+m.6,7).t(c);1n(2(){b.t(d)},10)})}),a(O).C("1o.1",2(){a("."+m.6).t(2(){7.3=""})})}});',62,87,'|placeholder|function|value|var|data|customClass|this|input|id||||||||||||||return|if|attr|password|type|textarea|each|document|define|name|hasClass|removeAttr|focus|else|text|bind|call|enabled|jQuery|hide|first|show|removeClass|textinput|try|catch|extend|window|in|createElement|fn|blur|typeof|amd|jquery|attributes|specified|test|nextAll||select|clone|before|prevAll|addClass|activeElement|object|OperaMini|Object|prototype|toString|operamini|valHooks|propHooks|filter|not|trigger|get|set|delegate|form|submit|setTimeout|beforeunload'.split('|'),0,{}));
 /*!
+	matchMedia() polyfill / addListener/removeListener extension
+	Copyright	Scott Jehl
+	License		MIT
+
+	https://github.com/paulirish/matchMedia.js
+*/
+window.matchMedia||(window.matchMedia=function(){"use strict";var styleMedia=(window.styleMedia||window.media);if(!styleMedia){var style=document.createElement('style'),script=document.getElementsByTagName('script')[0],info=null;style.type='text/css';style.id='matchmediajs-test';script.parentNode.insertBefore(style,script);info=('getComputedStyle'in window)&&window.getComputedStyle(style)||style.currentStyle;styleMedia={matchMedium:function(media){var text='@media '+media+'{ #matchmediajs-test { width: 1px; } }';if(style.styleSheet){style.styleSheet.cssText=text}else{style.textContent=text}return info.width==='1px'}}}return function(media){return{matches:styleMedia.matchMedium(media||'all'),media:media||'all'}}}());(function(){if(window.matchMedia&&window.matchMedia('all').addListener){return false}var localMatchMedia=window.matchMedia,hasMediaQueries=localMatchMedia('only all').matches,isListening=false,timeoutID=0,queries=[],handleChange=function(evt){clearTimeout(timeoutID);timeoutID=setTimeout(function(){for(var i=0,il=queries.length;i<il;i++){var mql=queries[i].mql,listeners=queries[i].listeners||[],matches=localMatchMedia(mql.media).matches;if(matches!==mql.matches){mql.matches=matches;for(var j=0,jl=listeners.length;j<jl;j++){listeners[j].call(window,mql)}}}},30)};window.matchMedia=function(media){var mql=localMatchMedia(media),listeners=[],index=0;mql.addListener=function(listener){if(!hasMediaQueries){return}if(!isListening){isListening=true;window.addEventListener('resize',handleChange,true)}if(index===0){index=queries.push({mql:mql,listeners:listeners})}listeners.push(listener)};mql.removeListener=function(listener){for(var i=0,il=listeners.length;i<il;i++){if(listeners[i]===listener){listeners.splice(i,1)}}};return mql}}());
+/*!
+	enquire.js
+	Copyright	Nick Williams
+	License		MIT
+	Version		2.1.2
+
+	https://github.com/WickyNilliams/enquire.js
+*/
+!function(a,b,c){var d=window.matchMedia;"undefined"!=typeof module&&module.exports?module.exports=c(d):"function"==typeof define&&define.amd?define(function(){return b[a]=c(d)}):b[a]=c(d)}("enquire",this,function(a){"use strict";function b(a,b){var c,d=0,e=a.length;for(d;e>d&&(c=b(a[d],d),c!==!1);d++);}function c(a){return"[object Array]"===Object.prototype.toString.apply(a)}function d(a){return"function"==typeof a}function e(a){this.options=a,!a.deferSetup&&this.setup()}function f(b,c){this.query=b,this.isUnconditional=c,this.handlers=[],this.mql=a(b);var d=this;this.listener=function(a){d.mql=a,d.assess()},this.mql.addListener(this.listener)}function g(){if(!a)throw new Error("matchMedia not present, legacy browsers require a polyfill");this.queries={},this.browserIsIncapable=!a("only all").matches}return e.prototype={setup:function(){this.options.setup&&this.options.setup(),this.initialised=!0},on:function(){!this.initialised&&this.setup(),this.options.match&&this.options.match()},off:function(){this.options.unmatch&&this.options.unmatch()},destroy:function(){this.options.destroy?this.options.destroy():this.off()},equals:function(a){return this.options===a||this.options.match===a}},f.prototype={addHandler:function(a){var b=new e(a);this.handlers.push(b),this.matches()&&b.on()},removeHandler:function(a){var c=this.handlers;b(c,function(b,d){return b.equals(a)?(b.destroy(),!c.splice(d,1)):void 0})},matches:function(){return this.mql.matches||this.isUnconditional},clear:function(){b(this.handlers,function(a){a.destroy()}),this.mql.removeListener(this.listener),this.handlers.length=0},assess:function(){var a=this.matches()?"on":"off";b(this.handlers,function(b){b[a]()})}},g.prototype={register:function(a,e,g){var h=this.queries,i=g&&this.browserIsIncapable;return h[a]||(h[a]=new f(a,i)),d(e)&&(e={match:e}),c(e)||(e=[e]),b(e,function(b){d(b)&&(b={match:b}),h[a].addHandler(b)}),this},unregister:function(a,b){var c=this.queries[a];return c&&(b?c.removeHandler(b):(c.clear(),delete this.queries[a])),this}},new g});
+/*!
 	jQuery Textarea AutoSize plugin
 	Copyright	Javier Julio
 	License		MIT
@@ -252,7 +269,11 @@ head.ready(function() {
 				if(!$.browser.mobile){
 					$('#sticky').addClass('scrolled').scrollToFixed();
 				} else {
-					$('#sticky').addClass('scrolled').scrollToFixed({ marginTop: 100 });
+					enquire.register('screen and (min-width: 651px)',function(){ 
+						$('#sticky').addClass('scrolled').scrollToFixed({ marginTop: 100 });
+					}).register('screen and (max-width: 650px)',function(){ 
+						$('#sticky').addClass('scrolled').scrollToFixed({ marginTop: 75 });
+					});					
 				}
 				$('#sticky.scrolled .inner').wrapInner('<div class="inset"></div>');
 				$('#sticky.scrolled ul > .inner .inset').each(function(){ $(this).css('width',$(this).outerWidth()); });
@@ -262,30 +283,25 @@ head.ready(function() {
 			},
 			scrolling : function(){		
 				if(!$.browser.mobile){
-					$(window).on('load scroll touchmove',function(){
+					$(window).on('load scroll',function(){
 						var lastScrollTop = 0;
 						if($(window).scrollTop() + $(window).height() == $(document).height()){ $('html').addClass('to-bottom'); } else { $('html').removeClass('to-bottom'); }
 						if($(window).scrollTop() <= 0){ $('html').addClass('to-top'); }
 						if($(window).scrollTop() >= 200){
 							var lastY;
 							$('html').removeClass('to-top');
-							$(window).on('DOMMouseScroll',function(e){
-								if(e.originalEvent.detail > 0) { $('html').removeClass('top-active'); } 
-								else { $('html').addClass('top-active'); }
+							$('html.gecko').each(function(){								
+								$(window).on('DOMMouseScroll',function(e){
+									if(e.originalEvent.detail > 0) { $('html').removeClass('top-active'); } 
+									else { $('html').addClass('top-active'); }
+								});
 							});
-							$(window).on('mousewheel',function(event){
-								if(event.originalEvent.wheelDelta < 0) { $('html:not(.ie)').removeClass('top-active'); } 
-								else { $('html:not(.ie)').addClass('top-active'); }
+							$('html:not(.gecko)').each(function(){		
+								$(window).on('mousewheel',function(event){
+									if(event.originalEvent.wheelDelta < 0) { $('html:not(.ie)').removeClass('top-active'); } 
+									else { $('html:not(.ie)').addClass('top-active'); }
+								});
 							});
-							/*$(window).on('touchmove',function(e){
-								var currentY = e.originalEvent.touches[0].clientY;
-								if(currentY > lastY){
-									$('html').addClass('top-active');
-								} else if(currentY < lastY){
-									$('html').removeClass('top-active');
-								}
-								lastY = currentY;
-							});*/
 						}
 					});
 				} else {

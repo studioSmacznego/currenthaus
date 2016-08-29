@@ -5,7 +5,7 @@
 	Author:		http://psdhtml.me
 		   		   
 ---------------------------------------------  */
-* { margin: 0; padding: 0; }
+* { margin: 0; padding: 0; scroll-behavior: smooth; }
 *, :before, :after { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; -o-box-sizing: border-box; -ms-box-sizing: border-box; box-sizing: border-box; }
 
 html { overflow-x: hidden; overflow-y: scroll; min-height: 100%; margin: 0 0 1px; background: #fff; font-size: 100.01%; -webkit-tap-highlight-color: rgba(0,0,0,0); -moz-osx-font-smoothing: grayscale; -webkit-overflow-scrolling: touch; -ms-content-zooming: none; }
@@ -815,7 +815,7 @@ svg:not(:root) { overflow: hidden; }
 #content.b figure figcaption { margin-left: 32px; margin-right: 32px; }
 
 #root { padding-top: 75px; }
-#top { height: 75px; }
+#top, .has-sticky #top { height: 75px; }
 	#logo { line-height: 75px; }
 	#top > .menu { right: 32px; height: 75px; margin: 0; }
 #featured { margin: -75px 0 90px; }
